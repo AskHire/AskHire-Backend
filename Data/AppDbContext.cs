@@ -1,7 +1,6 @@
 ﻿using AskHire_Backend.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace AskHire_Backend.Data.Entities
 {
     public class AppDbContext : DbContext
@@ -15,8 +14,5 @@ namespace AskHire_Backend.Data.Entities
         public DbSet<Interview> Interviews { get; set; }
         public DbSet<Application> Applies { get; set; }
         public DbSet<JobRole> JobRoles { get; set; }
-
-
     }
 }
-
