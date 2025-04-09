@@ -2,9 +2,14 @@
 using AskHire_Backend.Data.Repositories;
 using AskHire_Backend.Interfaces.Repositories;
 using AskHire_Backend.Interfaces.Services;
+using AskHire_Backend.Repositories.Interfaces;
+using AskHire_Backend.Services.Interfaces;
 using AskHire_Backend.Repositories;
 using AskHire_Backend.Services;
 using Microsoft.EntityFrameworkCore;
+using AskHire_Backend.Data.Entities;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,6 +49,20 @@ builder.Services.AddScoped<IQuestionService, QuestionService>();
 // Register JobRole repository and service
 builder.Services.AddScoped<IJobRoleRepository, JobRoleRepository>();
 builder.Services.AddScoped<IJobRoleService, JobRoleService>();
+
+
+builder.Services.AddScoped<IInterviewRepository, InterviewRepository>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IInterviewService, InterviewService>();
+
+builder.Services.AddScoped<INotificationService, NotificationService>();
+// Add services to the container.
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+
+// Register repository and service layers
+builder.Services.AddScoped<ICandidateRepository, CandidateRepository>();
+builder.Services.AddScoped<ICandidateService, CandidateService>();
 
 var app = builder.Build();
 

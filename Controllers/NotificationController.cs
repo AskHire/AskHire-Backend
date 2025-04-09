@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using AskHire_Backend.Models.Entities;
-using AskHire_Backend.Data.Entities; // Update the namespace to match your DbContext
+using AskHire_Backend.Services;
 using System;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 
 namespace AskHire_Backend.Controllers
 {
@@ -11,11 +10,11 @@ namespace AskHire_Backend.Controllers
     [ApiController]
     public class NotificationController : ControllerBase
     {
-        private readonly AppDbContext _context; // Use AppDbContext instead of ApplicationDbContext
+        private readonly INotificationService _notificationService;
 
-        public NotificationController(AppDbContext context)
+        public NotificationController(INotificationService notificationService)
         {
-            _context = context;
+            _notificationService = notificationService;
         }
 
         // POST: api/Notification
@@ -27,23 +26,18 @@ namespace AskHire_Backend.Controllers
                 return BadRequest("Notification is null.");
             }
 
-            // Generate a new GUID for the notification
-            notification.NotificationId = Guid.NewGuid();
+            var createdNotification = await _notificationService.CreateNotificationAsync(notification).ConfigureAwait(false);
 
-            // Add the notification to the database
-            _context.Notifications.Add(notification);
-            await _context.SaveChangesAsync();
-
-            // Return the created notification with a 201 status code
-            return CreatedAtAction(nameof(GetNotificationById), new { id = notification.NotificationId }, notification);
+            return CreatedAtAction(nameof(GetNotificationById),
+                new { id = createdNotification.NotificationId },
+                createdNotification);
         }
 
         // GET: api/Notification
         [HttpGet]
         public async Task<IActionResult> GetAllNotifications()
         {
-            // Return the list of notifications from the database
-            var notifications = await _context.Notifications.ToListAsync();
+            var notifications = await _notificationService.GetAllNotificationsAsync().ConfigureAwait(false);
             return Ok(notifications);
         }
 
@@ -51,15 +45,13 @@ namespace AskHire_Backend.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetNotificationById(Guid id)
         {
-            // Find the notification by ID
-            var notification = await _context.Notifications.FindAsync(id);
+            var notification = await _notificationService.GetNotificationByIdAsync(id).ConfigureAwait(false);
 
             if (notification == null)
             {
-                return NotFound(); // Return 404 if the notification is not found
+                return NotFound();
             }
 
-            // Return the notification
             return Ok(notification);
         }
     }
