@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AskHire_Backend.Services
 {
-    public class JobRoleService : Interfaces.Services.IJobRoleService
+    public class JobRoleService : AskHire_Backend.Interfaces.Services.IJobRoleService
     {
         private readonly IJobRoleRepository _jobRoleRepository;
 
@@ -21,13 +21,12 @@ namespace AskHire_Backend.Services
             {
                 throw new ArgumentNullException(nameof(jobRole), "Job role cannot be null.");
             }
-
             return await _jobRoleRepository.CreateJobRoleAsync(jobRole);
         }
 
         public async Task<JobRole?> GetJobRoleByIdAsync(Guid id)
         {
-            return await _jobRoleRepository.GetJobRoleByIdAsync(id); // This can return null, which matches the nullable return type
+            return await _jobRoleRepository.GetJobRoleByIdAsync(id);
         }
 
         public async Task<IEnumerable<JobRole>> GetAllJobRolesAsync()
@@ -46,8 +45,7 @@ namespace AskHire_Backend.Services
             {
                 throw new ArgumentNullException(nameof(jobRole), "Job role cannot be null.");
             }
-
-            return await _jobRoleRepository.UpdateJobRoleAsync(jobRole); // This can also return null, which matches the nullable return type
+            return await _jobRoleRepository.UpdateJobRoleAsync(jobRole);
         }
     }
 }
