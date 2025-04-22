@@ -5171,23 +5171,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\ASUS\\.nuget\\packages\\": {},
+    "C:\\Users\\senur\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\ASUS\\Source\\Repos\\AskHire-Backend\\AskHire-Backend.csproj",
+      "projectUniqueName": "C:\\New folder\\2nd year 2nd sem\\Software Development Project\\AskHire-Backend\\AskHire-Backend.csproj",
       "projectName": "AskHire-Backend",
-      "projectPath": "C:\\Users\\ASUS\\Source\\Repos\\AskHire-Backend\\AskHire-Backend.csproj",
-      "packagesPath": "C:\\Users\\ASUS\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\ASUS\\Source\\Repos\\AskHire-Backend\\obj\\",
+      "projectPath": "C:\\New folder\\2nd year 2nd sem\\Software Development Project\\AskHire-Backend\\AskHire-Backend.csproj",
+      "packagesPath": "C:\\Users\\senur\\.nuget\\packages\\",
+      "outputPath": "C:\\New folder\\2nd year 2nd sem\\Software Development Project\\AskHire-Backend\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\ASUS\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\senur\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -5196,6 +5196,7 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
