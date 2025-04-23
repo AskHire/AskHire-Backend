@@ -14,5 +14,6 @@ namespace AskHire_Backend.Data.Entities
         public DbSet<Interview> Interviews { get; set; }
         public DbSet<Application> Applies { get; set; }
         public DbSet<JobRole> JobRoles { get; set; }
+        public DbSet<Reminder> Reminder { get; set; }
     }
 }

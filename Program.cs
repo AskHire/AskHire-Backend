@@ -1,4 +1,4 @@
-﻿using AskHire_Backend.Data.Entities;
+using AskHire_Backend.Data.Entities;
 using AskHire_Backend.Data.Repositories;
 using AskHire_Backend.Interfaces.Repositories;
 using AskHire_Backend.Interfaces.Services;
