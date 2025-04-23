@@ -4,6 +4,8 @@ using AskHire_Backend.Models.Entities;
 using AskHire_Backend.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace AskHire_Backend.Repositories
@@ -17,6 +19,7 @@ namespace AskHire_Backend.Repositories
             _context = context;
         }
 
+        // Change the return type to Application if Apply doesn't exist
         public async Task<Application> GetApplicationWithUserAsync(Guid applicationId)
         {
             return await _context.Applies
@@ -31,9 +34,25 @@ namespace AskHire_Backend.Repositories
             return interview;
         }
 
-        public Task<Application> GetApplicationWithUserAsync(int applicationId)
+        public async Task<Interview> UpdateInterviewAsync(Interview interview)
         {
-            throw new NotImplementedException();
+            _context.Interviews.Update(interview);
+            await _context.SaveChangesAsync();
+            return interview;
+        }
+
+        public async Task<Interview> GetInterviewByApplicationIdAsync(Guid applicationId)
+        {
+            return await _context.Interviews
+                .FirstOrDefaultAsync(i => i.ApplicationId == applicationId);
+        }
+
+        public async Task<List<Interview>> GetAllInterviewsAsync()
+        {
+            return await _context.Interviews
+                .Include(i => i.Application)
+                    .ThenInclude(a => a.User)
+                .ToListAsync();
         }
     }
 }

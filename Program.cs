@@ -47,6 +47,8 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<ICandidateRepository, CandidateRepository>();
 builder.Services.AddScoped<ICandidateService, CandidateService>();
 
+
+
 var app = builder.Build();
 // ✅ Enable Swagger for API Documentation
 app.UseSwagger();

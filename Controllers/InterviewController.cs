@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using AskHire_Backend.Models.Entities;
-using AskHire_Backend.Data.Entities;
-using Microsoft.EntityFrameworkCore;
-using System.Net;
-using System.Net.Mail;
+using AskHire_Backend.Models.DTOs;
+using AskHire_Backend.Services.Interfaces;
+using System;
 using System.Threading.Tasks;
 
 namespace AskHire_Backend.Controllers
@@ -12,93 +10,64 @@ namespace AskHire_Backend.Controllers
     [ApiController]
     public class InterviewController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IInterviewService _interviewService;
 
-        public InterviewController(AppDbContext context)
+        public InterviewController(IInterviewService interviewService)
         {
-            _context = context;
+            _interviewService = interviewService;
         }
 
         [HttpPost]
-        public async Task<ActionResult> ScheduleInterview(InterviewScheduleRequest interviewRequest)
+        public async Task<IActionResult> ScheduleInterview(InterviewScheduleRequestDTO interviewRequest)
         {
-            // Find the application instead of user
-            var application = await _context.Applies.Include(a => a.User)
-                .FirstOrDefaultAsync(a => a.ApplicationId == interviewRequest.ApplicationId);
-
-            if (application == null)
+            if (!ModelState.IsValid)
             {
-                return NotFound("Application not found");
+                return BadRequest(ModelState);
             }
 
-            // Convert string date and time to proper types
-            if (!DateTime.TryParse(interviewRequest.Date, out DateTime interviewDate))
+            var result = await _interviewService.ScheduleInterviewAsync(interviewRequest);
+            if (!result)
             {
-                return BadRequest("Invalid date format");
+                return BadRequest("Failed to schedule interview.");
             }
-
-            if (!TimeSpan.TryParse(interviewRequest.Time, out TimeSpan interviewTime))
-            {
-                return BadRequest("Invalid time format");
-            }
-
-            // Save interview schedule with the correct properties according to Interview entity
-            var interview = new Interview
-            {
-                ApplicationId = application.ApplicationId,
-                Application = application,
-                Date = interviewDate,
-                Time = interviewTime,
-                Instructions = interviewRequest.Instructions,
-                CandidateEmail = application.User.Email // Assuming User has Email property
-            };
-
-            _context.Interviews.Add(interview);
-            await _context.SaveChangesAsync();
-
-            // Send email to candidate
-            await SendInterviewEmail(interview.CandidateEmail, interview);
 
             return Ok("Interview scheduled and invitation sent.");
         }
 
-        private async Task SendInterviewEmail(string candidateEmail, Interview interview)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateInterview(Guid id, InterviewScheduleRequestDTO interviewRequest)
         {
-            var fromAddress = new MailAddress("youremail@example.com", "Your Company");
-            var toAddress = new MailAddress(candidateEmail);
-            const string subject = "Interview Invitation";
-
-            string body = $@"Dear Candidate,
-
-            You are invited to an interview scheduled on {interview.Date.ToShortDateString()} at {interview.Time}.
-
-            Instructions: {interview.Instructions}
-
-            Best regards,
-            Your Company";
-
-            using (var smtpClient = new SmtpClient("smtp.gmail.com")
+            if (!ModelState.IsValid)
             {
-                Port = 587,
-                Credentials = new NetworkCredential("dimashiwickramage2002@gmail.com", "fnxm msjt blvm vnmo"),
-                EnableSsl = true
-            })
-            using (var message = new MailMessage(fromAddress, toAddress)
-            {
-                Subject = subject,
-                Body = body
-            })
-            {
-                await smtpClient.SendMailAsync(message);
+                return BadRequest(ModelState);
             }
-        }
-    }
 
-    public class InterviewScheduleRequest
-    {
-        public Guid ApplicationId { get; set; }
-        public string Date { get; set; }
-        public string Time { get; set; }
-        public string Instructions { get; set; }
+            var result = await _interviewService.UpdateInterviewAsync(id, interviewRequest);
+            if (!result)
+            {
+                return BadRequest("Failed to update interview.");
+            }
+
+            return Ok("Interview updated and notification sent.");
+        }
+
+        [HttpGet("application/{applicationId}")]
+        public async Task<IActionResult> GetInterviewByApplicationId(Guid applicationId)
+        {
+            var interview = await _interviewService.GetInterviewByApplicationIdAsync(applicationId);
+            if (interview == null)
+            {
+                return NotFound("Interview not found.");
+            }
+
+            return Ok(interview);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllInterviews()
+        {
+            var interviews = await _interviewService.GetAllInterviewsAsync();
+            return Ok(interviews);
+        }
     }
 }
