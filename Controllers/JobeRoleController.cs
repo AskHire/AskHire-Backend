@@ -1,9 +1,6 @@
 using AskHire_Backend.Interfaces.Services;
 using AskHire_Backend.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
 
 namespace AskHire_Backend.Controllers
 {

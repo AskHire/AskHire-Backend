@@ -3,10 +3,12 @@ using AskHire_Backend.Interfaces.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AskHire_Backend.Interfaces.Services;
 
 namespace AskHire_Backend.Services
 {
-    public class JobRoleService : AskHire_Backend.Interfaces.Services.IJobRoleService
+    public class JobRoleService : IJobRoleService
+
     {
         private readonly IJobRoleRepository _jobRoleRepository;
 

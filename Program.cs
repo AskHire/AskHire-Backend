@@ -1,10 +1,15 @@
-﻿using AskHire_Backend.Data.Repositories;
+using AskHire_Backend.Data.Entities;
+using AskHire_Backend.Data.Repositories;
 using AskHire_Backend.Interfaces.Repositories;
 using AskHire_Backend.Interfaces.Services;
 using AskHire_Backend.Repositories.Interfaces;
 using AskHire_Backend.Services.Interfaces;
 using AskHire_Backend.Repositories;
+using AskHire_Backend.Repositories.Implementations;
+using AskHire_Backend.Repositories.Interfaces;
 using AskHire_Backend.Services;
+using AskHire_Backend.Services.Implementations;
+using AskHire_Backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using AskHire_Backend.Data.Entities;
 
@@ -21,6 +26,11 @@ builder.Services.AddCors(options =>
 });
 // ✅ Add Controllers
 builder.Services.AddControllers();
+
+builder.Services.AddHttpClient();
+
+
+
 // ✅ Configure Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -47,6 +57,9 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<ICandidateRepository, CandidateRepository>();
 builder.Services.AddScoped<ICandidateService, CandidateService>();
 
+
+builder.Services.AddScoped<IInterviewRepository, InterviewRepository>();
+builder.Services.AddScoped<IInterviewService, InterviewService>();
 
 
 var app = builder.Build();
