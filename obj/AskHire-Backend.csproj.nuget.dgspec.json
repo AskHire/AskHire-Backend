@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/akila/Documents/AskHire Backend Complete/AskHire-Backend/AskHire-Backend.csproj": {}
+    "/Users/akila/Documents/AskHire Backend Complete (Final)/AskHire-Backend/AskHire-Backend.csproj": {}
   },
   "projects": {
-    "/Users/akila/Documents/AskHire Backend Complete/AskHire-Backend/AskHire-Backend.csproj": {
+    "/Users/akila/Documents/AskHire Backend Complete (Final)/AskHire-Backend/AskHire-Backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/akila/Documents/AskHire Backend Complete/AskHire-Backend/AskHire-Backend.csproj",
+        "projectUniqueName": "/Users/akila/Documents/AskHire Backend Complete (Final)/AskHire-Backend/AskHire-Backend.csproj",
         "projectName": "AskHire-Backend",
-        "projectPath": "/Users/akila/Documents/AskHire Backend Complete/AskHire-Backend/AskHire-Backend.csproj",
+        "projectPath": "/Users/akila/Documents/AskHire Backend Complete (Final)/AskHire-Backend/AskHire-Backend.csproj",
         "packagesPath": "/Users/akila/.nuget/packages/",
-        "outputPath": "/Users/akila/Documents/AskHire Backend Complete/AskHire-Backend/obj/",
+        "outputPath": "/Users/akila/Documents/AskHire Backend Complete (Final)/AskHire-Backend/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/akila/.nuget/NuGet/NuGet.Config"
@@ -48,6 +48,10 @@
               "target": "Package",
               "version": "[9.0.1, )"
             },
+            "Microsoft.Data.SqlClient": {
+              "target": "Package",
+              "version": "[6.0.1, )"
+            },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
               "version": "[9.0.2, )"
@@ -71,6 +75,10 @@
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[7.3.1, )"
+            },
+            "System.Data.SqlClient": {
+              "target": "Package",
+              "version": "[4.9.0, )"
             }
           },
           "imports": [
