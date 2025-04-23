@@ -3,10 +3,12 @@ using AskHire_Backend.Interfaces.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AskHire_Backend.Interfaces.Services;
 
 namespace AskHire_Backend.Services
 {
-    public class JobRoleService : Interfaces.Services.IJobRoleService
+    public class JobRoleService : IJobRoleService
+
     {
         private readonly IJobRoleRepository _jobRoleRepository;
 
@@ -24,6 +26,18 @@ namespace AskHire_Backend.Services
         public async Task<JobRole?> GetJobRoleByIdAsync(Guid id) =>
             await _jobRoleRepository.GetJobRoleByIdAsync(id);
 
+            if (jobRole == null)
+            {
+                throw new ArgumentNullException(nameof(jobRole), "Job role cannot be null.");
+            }
+            return await _jobRoleRepository.CreateJobRoleAsync(jobRole);
+        }
+
+        public async Task<JobRole?> GetJobRoleByIdAsync(Guid id)
+        {
+            return await _jobRoleRepository.GetJobRoleByIdAsync(id);
+        }
+
         public async Task<IEnumerable<JobRole>> GetAllJobRolesAsync() =>
             await _jobRoleRepository.GetAllJobRolesAsync();
 
@@ -32,7 +46,14 @@ namespace AskHire_Backend.Services
 
         public async Task<JobRole?> UpdateJobRoleAsync(JobRole jobRole)
         {
+
             if (jobRole == null) throw new ArgumentNullException(nameof(jobRole));
+
+            if (jobRole == null)
+            {
+                throw new ArgumentNullException(nameof(jobRole), "Job role cannot be null.");
+            }
+
             return await _jobRoleRepository.UpdateJobRoleAsync(jobRole);
         }
 

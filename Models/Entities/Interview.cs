@@ -1,5 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AskHire_Backend.Models.Entities
 {
@@ -9,10 +10,18 @@ namespace AskHire_Backend.Models.Entities
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid InterviewId { get; set; }
 
-        public required DateTime Date { get; set; }
-        public required TimeSpan Time { get; set; }
+        [Required]
+        public DateTime Date { get; set; }
 
-        public required string Interview_Instructions { get; set; }
+        [Required]
+        public TimeSpan Time { get; set; }
+
+        [Required]
+        public string Instructions { get; set; } = string.Empty;
+
+        [Required]
+        [EmailAddress]
+        public string CandidateEmail { get; set; } = string.Empty;
 
         [ForeignKey("Application")]
         public Guid ApplicationId { get; set; }
