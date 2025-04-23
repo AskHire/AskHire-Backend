@@ -28,4 +28,5 @@ Migrations/*_*.Designer.cs
 Migrations/*_*.cs
 !Migrations/AppDbContextModelSnapshot.cs
 
-appsettings.json
+# Ignore all appsettings.json files
+appsettings.*.json
