@@ -13,5 +13,6 @@ namespace AskHire_Backend.Services.Interfaces
         Task<bool> UpdateInterviewAsync(Guid interviewId, InterviewScheduleRequestDTO interviewRequest);
         Task<Interview> GetInterviewByApplicationIdAsync(Guid applicationId);
         Task<List<Interview>> GetAllInterviewsAsync();
+        Task<List<UserInterviewDetailsDto>> GetInterviewsByUserIdAsync(Guid userId);
     }
 }

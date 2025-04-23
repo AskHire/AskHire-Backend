@@ -119,5 +119,17 @@ namespace AskHire_Backend.Services
         {
             return await _interviewRepository.GetAllInterviewsAsync();
         }
+
+        
+
+        public InterviewService(IInterviewRepository interviewRepository)
+        {
+            _interviewRepository = interviewRepository;
+        }
+
+        public async Task<List<UserInterviewDetailsDto>> GetInterviewsByUserIdAsync(Guid userId)
+        {
+            return await _interviewRepository.GetInterviewsByUserIdAsync(userId);
+        }
     }
 }

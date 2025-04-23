@@ -69,5 +69,17 @@ namespace AskHire_Backend.Controllers
             var interviews = await _interviewService.GetAllInterviewsAsync();
             return Ok(interviews);
         }
+
+        [HttpGet("byUser/{userId}")]
+        public async Task<ActionResult<List<UserInterviewDetailsDto>>> GetInterviewsByUserId(Guid userId)
+        {
+            var interviews = await _interviewService.GetInterviewsByUserIdAsync(userId);
+            if (interviews == null || interviews.Count == 0)
+            {
+                return NotFound("No interviews found for the given user ID.");
+            }
+
+            return Ok(interviews);
+        }
     }
 }

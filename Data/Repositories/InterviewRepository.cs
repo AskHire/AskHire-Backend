@@ -1,5 +1,6 @@
 ﻿using AskHire_Backend.Data;
 using AskHire_Backend.Data.Entities;
+using AskHire_Backend.Models.DTOs;
 using AskHire_Backend.Models.Entities;
 using AskHire_Backend.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -54,5 +55,26 @@ namespace AskHire_Backend.Repositories
                     .ThenInclude(a => a.User)
                 .ToListAsync();
         }
+
+        public async Task<List<Models.DTOs.UserInterviewDetailsDto>> GetInterviewsByUserIdAsync(Guid userId)
+        {
+            return await _context.Interviews
+                .Include(i => i.Application)
+                    .ThenInclude(a => a.Vacancy)
+                .Where(i => i.Application.UserId == userId)
+                .Select(i => new UserInterviewDetailsDto
+                {
+                    UserId = i.Application.UserId,
+                    ApplicationId = i.ApplicationId,
+                    VacancyId = i.Application.Vacancy.VacancyId,
+                    VacancyName = i.Application.Vacancy.VacancyName,
+                    InterviewDate = i.Date,
+                    InterviewTime = i.Time,
+                    Instructions = i.Instructions
+                })
+                .ToListAsync();
+        }
+
     }
 }
+
