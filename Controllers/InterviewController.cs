@@ -1,6 +1,10 @@
-﻿using AskHire_Backend.Models.DTOs;
+
+﻿using Microsoft.AspNetCore.Mvc;
+using AskHire_Backend.Models.DTOs;
 using AskHire_Backend.Services.Interfaces;
-using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
+
 
 namespace AskHire_Backend.Controllers
 {
@@ -15,6 +19,60 @@ namespace AskHire_Backend.Controllers
             _interviewService = interviewService;
         }
 
+
+        [HttpPost]
+        public async Task<IActionResult> ScheduleInterview(InterviewScheduleRequestDTO interviewRequest)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var result = await _interviewService.ScheduleInterviewAsync(interviewRequest);
+            if (!result)
+            {
+                return BadRequest("Failed to schedule interview.");
+            }
+
+            return Ok("Interview scheduled and invitation sent.");
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateInterview(Guid id, InterviewScheduleRequestDTO interviewRequest)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var result = await _interviewService.UpdateInterviewAsync(id, interviewRequest);
+            if (!result)
+            {
+                return BadRequest("Failed to update interview.");
+            }
+
+            return Ok("Interview updated and notification sent.");
+        }
+
+        [HttpGet("application/{applicationId}")]
+        public async Task<IActionResult> GetInterviewByApplicationId(Guid applicationId)
+        {
+            var interview = await _interviewService.GetInterviewByApplicationIdAsync(applicationId);
+            if (interview == null)
+            {
+                return NotFound("Interview not found.");
+            }
+
+            return Ok(interview);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllInterviews()
+        {
+            var interviews = await _interviewService.GetAllInterviewsAsync();
+            return Ok(interviews);
+        }
+
         [HttpGet("byUser/{userId}")]
         public async Task<ActionResult<List<UserInterviewDetailsDto>>> GetInterviewsByUserId(Guid userId)
         {
@@ -27,4 +85,4 @@ namespace AskHire_Backend.Controllers
             return Ok(interviews);
         }
     }
-}
+
