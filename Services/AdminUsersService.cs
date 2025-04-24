@@ -36,7 +36,6 @@ namespace AskHire_Backend.Services
             existing.NIC = user.NIC;
             existing.MobileNumber = user.MobileNumber;
             existing.Address = user.Address;
-            existing.State = user.State;
             existing.Role = user.Role;
             existing.RefreshToken = user.RefreshToken;
             existing.RefreshTokenExpiryTime = user.RefreshTokenExpiryTime;
