@@ -3,7 +3,11 @@ using AskHire_Backend.Data.Repositories;
 using AskHire_Backend.Interfaces.Repositories;
 using AskHire_Backend.Interfaces.Services;
 using AskHire_Backend.Repositories;
+using AskHire_Backend.Repositories.Implementations;
+using AskHire_Backend.Repositories.Interfaces;
 using AskHire_Backend.Services;
+using AskHire_Backend.Services.Implementations;
+using AskHire_Backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +25,8 @@ builder.Services.AddCors(options =>
 
 // ✅ Add Controllers
 builder.Services.AddControllers();
+builder.Services.AddHttpClient();
+
 
 // ✅ Configure Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -42,8 +48,31 @@ builder.Services.AddScoped<IQuestionService, QuestionService>();
 builder.Services.AddScoped<IJobRoleRepository, JobRoleRepository>();
 builder.Services.AddScoped<IJobRoleService, JobRoleService>();
 
+
+builder.Services.AddScoped<IInterviewRepository, InterviewRepository>();
+builder.Services.AddScoped<IInterviewService, InterviewService>();
+
+builder.Services.AddScoped<IPreScreenTestRepository, PreScreenTestRepository>();
+builder.Services.AddScoped<IPreScreenTestService, PreScreenTestService>();
+
+builder.Services.AddScoped<IAnswerCheckRepository, AnswerCheckRepository>();
+builder.Services.AddScoped<IAnswerCheckService, AnswerCheckService>();
+
+
 builder.Services.AddScoped<IReminderRepository, ReminderRepository>();
 builder.Services.AddScoped<IReminderService, ReminderService>();
+
+builder.Services.AddScoped<IAdminJobRoleRepository, AdminJobRoleRepository>();
+builder.Services.AddScoped<IAdminJobRoleService, AdminJobRoleService>();
+
+builder.Services.AddScoped<IAdminNotificationRepository, AdminNotificationRepository>();
+builder.Services.AddScoped<IAdminNotificationService, AdminNotificationService>();
+
+builder.Services.AddScoped<IAdminUserRepository, AdminUserRepository>();
+builder.Services.AddScoped<IAdminUserService, AdminUserService>();
+
+
+
 
 var app = builder.Build();
 
