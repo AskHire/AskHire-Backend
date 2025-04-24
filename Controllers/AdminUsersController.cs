@@ -37,6 +37,23 @@ namespace AskHire_Backend.Controllers
             return Ok(user);
         }
 
+        [HttpGet("total-users")]
+        public async Task<ActionResult<int>> GetTotalUsers()
+        {
+            try
+            {
+                var count = await _userService.GetTotalUsersAsync();
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+
+            }
+        }
+
+
+
         [HttpPost("users")]
         public async Task<ActionResult<User>> CreateUser(User user)
         {

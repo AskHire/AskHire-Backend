@@ -22,5 +22,7 @@ namespace AskHire_Backend.Services.Interfaces
         Task<bool> DeleteAdminAsync(Guid id);
         Task<bool> DeleteCandidateAsync(Guid id);
         Task<bool> DeleteManagerAsync(Guid id);
+
+        Task<int> GetTotalUsersAsync();
     }
 }

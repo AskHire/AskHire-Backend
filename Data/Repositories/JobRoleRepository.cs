@@ -18,7 +18,7 @@ namespace AskHire_Backend.Data.Repositories
         public JobRoleRepository(AppDbContext context, IConfiguration configuration)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
-            _connectionString = configuration.GetConnectionString("DatabaseString") // ✅ FIXED
+            _connectionString = configuration.GetConnectionString("DatabaseString") 
                 ?? throw new InvalidOperationException("Connection string 'DatabaseString' not found.");
         }
 

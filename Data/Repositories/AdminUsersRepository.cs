@@ -6,17 +6,25 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 
 namespace AskHire_Backend.Repositories
 {
     public class AdminUserRepository : IAdminUserRepository
     {
-        private readonly AppDbContext _context;
 
-        public AdminUserRepository(AppDbContext context)
+        private readonly AppDbContext _context;
+        private readonly string _connectionString;
+
+        public AdminUserRepository(AppDbContext context, IConfiguration configuration)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _connectionString = configuration.GetConnectionString("DatabaseString") 
+                ?? throw new InvalidOperationException("Connection string 'DatabaseString' not found.");
         }
+
+
+        // Removed duplicate _context declaration and constructor
 
         public async Task<IEnumerable<User>> GetAllAsync() => await _context.Users.ToListAsync();
 
@@ -34,6 +42,20 @@ namespace AskHire_Backend.Repositories
         {
             _context.Users.Update(user);
             return await _context.SaveChangesAsync() > 0;
+        }
+
+
+        public async Task<int> GetTotalUsersAsync() 
+        {
+            {
+            using var connection = new SqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            using var command = new SqlCommand("SELECT COUNT(*) FROM Users", connection);
+            var result = await command.ExecuteScalarAsync();
+
+            return result != null ? Convert.ToInt32(result) : 0;
+        }
         }
 
         public async Task<bool> DeleteAsync(Guid id)

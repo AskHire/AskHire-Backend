@@ -69,5 +69,8 @@ namespace AskHire_Backend.Services
             if (user == null || user.Role != role) return false;
             return await _userRepo.DeleteAsync(id);
         }
+
+        public async Task<int> GetTotalUsersAsync() =>
+            await _userRepo.GetTotalUsersAsync();
     }
 }
