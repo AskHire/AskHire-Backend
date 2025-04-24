@@ -21,7 +21,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.3.1" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,7 +28,6 @@
     <Folder Include="Data\Repositories\" />
     <Folder Include="Interfaces\Repositories\" />
     <Folder Include="Interfaces\Services\" />
-    <Folder Include="Models\DTOs\" />
     <Folder Include="Services\" />
   </ItemGroup>
 
