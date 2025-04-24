@@ -3,6 +3,7 @@ using AskHire_Backend.Interfaces.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AskHire_Backend.Models.DTOs;
 
 namespace AskHire_Backend.Services
 {
@@ -46,8 +47,18 @@ namespace AskHire_Backend.Services
             {
                 throw new ArgumentNullException(nameof(vacancy), "Vacancy cannot be null.");
             }
-            
+
             return await _vacancyRepository.UpdateVacancyAsync(vacancy);
+        }
+
+
+
+
+
+        //eshan
+        public async Task<IEnumerable<JobWiseVacancyDto>> GetJobWiseVacanciesAsync()
+        {
+            return await _vacancyRepository.GetJobWiseVacanciesAsync();
         }
     }
 }

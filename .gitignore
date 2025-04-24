@@ -1,4 +1,4 @@
-# Ignore build output and intermediate files
+# Build results
 bin/
 obj/
 
@@ -8,25 +8,60 @@ obj/
 *.userosscache
 *.sln.docstates
 
-# Logs
-*.log
+# ASP.NET
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
 
-# Visual Studio Code
+# EF Core Migrations (optional, if you regenerate them)
+# Migrations/
+
+# Rider and VS Code
+.idea/
 .vscode/
 *.code-workspace
 
-# OS generated files
-.DS_Store
+# Logs
+*.log
+logs/
+log/
+
+# .NET Core tooling
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Coverage tools
+coverage/
+*.coverage
+*.coveragexml
+
+# Packages
+*.nupkg
+*.snupkg
+*.nuspec
+*.psmdcp
+packages/
+.nuget/
+
+# Visual Studio Cache/Config
+.vs/
+.vscode/
+.vsconfig
+
+# Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+# JetBrains Rider
+.idea/
+
+# EF Core tools files (safe to include)
+# You may want to include the Migrations folder if you're tracking schema changes
+# However, exclude the generated database snapshot if you regenerate it often
+# Migrations/*ModelSnapshot.cs
+
+# System files
 Thumbs.db
-
-# Application settings
-appsettings.Development.json
-appsettings.json
-
-# Entity Framework Migrations
-Migrations/*_*.Designer.cs
-Migrations/*_*.cs
-!Migrations/AppDbContextModelSnapshot.cs
-
-# Ignore all appsettings.json files
-appsettings.*.json
+ehthumbs.db
+Desktop.ini
