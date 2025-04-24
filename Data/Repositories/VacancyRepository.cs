@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AskHire_Backend.Data.Entities;
+using AskHire_Backend.Models.DTOs;
 
 namespace AskHire_Backend.Data.Repositories
 {
@@ -60,5 +61,25 @@ namespace AskHire_Backend.Data.Repositories
             await _context.SaveChangesAsync();
             return existingVacancy;
         }
+
+
+        //eshan
+        public async Task<IEnumerable<JobWiseVacancyDto>> GetJobWiseVacanciesAsync()
+        {
+            return await _context.Vacancies
+                .Include(v => v.JobRole)
+                .Select(v => new JobWiseVacancyDto
+                {
+                    VacancyId = v.VacancyId,
+                    VacancyName = v.VacancyName,
+                    WorkType = v.JobRole != null ? v.JobRole.WorkType : "N/A",
+                    WorkLocation = v.JobRole != null ? v.JobRole.WorkLocation : "N/A",
+                    Description = v.JobRole != null ? v.JobRole.Description : "N/A",
+                    Instructions = v.Instructions,
+                    EndDate = v.EndDate
+                })
+                .ToListAsync();
+        }
+
     }
 }
