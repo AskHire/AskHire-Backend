@@ -11,6 +11,8 @@ namespace AskHire_Backend.Repositories.Interfaces
         Task<bool> UpdateAsync(User user);
         Task<bool> DeleteAsync(Guid id);
 
+        Task<int> GetTotalUsersAsync();
+
         Task<IEnumerable<User>> GetByRoleAsync(string role);
     }
 }
