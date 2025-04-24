@@ -5,6 +5,7 @@ using AskHire_Backend.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace AskHire_Backend.Repositories
@@ -24,7 +25,7 @@ namespace AskHire_Backend.Repositories
 
         public async Task<User> AddAsync(User user)
         {
-            user.UserId = Guid.NewGuid();
+            user.Id = Guid.NewGuid(); // Changed from user.UserId
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
             return user;

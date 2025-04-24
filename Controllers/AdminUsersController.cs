@@ -1,13 +1,9 @@
-﻿// Reorganized standard architecture for AdminUsersController using Repositories and Services
-
-using AskHire_Backend.Data;
-using AskHire_Backend.Data.Entities;
-using AskHire_Backend.Repositories.Interfaces;
+﻿using AskHire_Backend.Models.Entities;
 using AskHire_Backend.Services.Interfaces;
-using AskHire_Backend.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using AskHire_Backend.Models.Entities;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace AskHire_Backend.Controllers
 {
@@ -41,7 +37,7 @@ namespace AskHire_Backend.Controllers
         public async Task<ActionResult<User>> CreateUser(User user)
         {
             var createdUser = await _userService.CreateUserAsync(user);
-            return CreatedAtAction(nameof(GetUser), new { id = createdUser.UserId }, createdUser);
+            return CreatedAtAction(nameof(GetUser), new { id = createdUser.Id }, createdUser); // Changed from UserId
         }
 
         [HttpPut("users/{id}")]
@@ -75,10 +71,10 @@ namespace AskHire_Backend.Controllers
             return Ok(await _userService.GetAdminsAsync());
         }
 
-        [HttpDelete("admins/{UserId}")]
-        public async Task<IActionResult> DeleteAdmin(Guid UserId)
+        [HttpDelete("admins/{id}")]
+        public async Task<IActionResult> DeleteAdmin(Guid id)
         {
-            var result = await _userService.DeleteAdminAsync(UserId);
+            var result = await _userService.DeleteAdminAsync(id);
             if (!result) return NotFound(new { message = "Admin not found" });
             return NoContent();
         }
@@ -90,10 +86,10 @@ namespace AskHire_Backend.Controllers
             return Ok(await _userService.GetCandidatesAsync());
         }
 
-        [HttpDelete("candidates/{UserId}")]
-        public async Task<IActionResult> DeleteCandidate(Guid UserId)
+        [HttpDelete("candidates/{id}")]
+        public async Task<IActionResult> DeleteCandidate(Guid id)
         {
-            var result = await _userService.DeleteCandidateAsync(UserId);
+            var result = await _userService.DeleteCandidateAsync(id);
             if (!result) return NotFound(new { message = "Candidate not found" });
             return NoContent();
         }
@@ -105,10 +101,10 @@ namespace AskHire_Backend.Controllers
             return Ok(await _userService.GetManagersAsync());
         }
 
-        [HttpDelete("managers/{UserId}")]
-        public async Task<IActionResult> DeleteManager(Guid UserId)
+        [HttpDelete("managers/{id}")]
+        public async Task<IActionResult> DeleteManager(Guid id)
         {
-            var result = await _userService.DeleteManagerAsync(UserId);
+            var result = await _userService.DeleteManagerAsync(id);
             if (!result) return NotFound(new { message = "Manager not found" });
             return NoContent();
         }
