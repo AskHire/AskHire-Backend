@@ -52,6 +52,12 @@ builder.Services.AddScoped<IJobRoleService, JobRoleService>();
 builder.Services.AddScoped<IInterviewRepository, InterviewRepository>();
 builder.Services.AddScoped<IInterviewService, InterviewService>();
 
+builder.Services.AddScoped<IPreScreenTestRepository, PreScreenTestRepository>();
+builder.Services.AddScoped<IPreScreenTestService, PreScreenTestService>();
+
+builder.Services.AddScoped<IAnswerCheckRepository, AnswerCheckRepository>();
+builder.Services.AddScoped<IAnswerCheckService, AnswerCheckService>();
+
 
 builder.Services.AddScoped<IReminderRepository, ReminderRepository>();
 builder.Services.AddScoped<IReminderService, ReminderService>();
