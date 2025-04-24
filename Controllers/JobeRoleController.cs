@@ -1,9 +1,5 @@
 using AskHire_Backend.Models.Entities;
-using AskHire_Backend.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
 
 namespace AskHire_Backend.Controllers
 {
@@ -79,6 +75,23 @@ namespace AskHire_Backend.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+
+
+        [HttpGet("total-jobs")]
+        public async Task<IActionResult> GetTotalJobs()
+        {
+            try
+            {
+                var count = await _jobRoleService.GetTotalJobsAsync();
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching total jobs count.");
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
 
         // PUT: api/jobrole/{id}
         [HttpPut("{id}")]
