@@ -15,15 +15,13 @@ namespace AskHire_Backend.Data.Repositories
         private readonly AppDbContext _context;
         private readonly string _connectionString;
 
-        // Constructor that takes AppDbContext and IConfiguration for dependency injection
         public JobRoleRepository(AppDbContext context, IConfiguration configuration)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
-            _connectionString = configuration.GetConnectionString("DefaultConnection")
-                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            _connectionString = configuration.GetConnectionString("DatabaseString") // ✅ FIXED
+                ?? throw new InvalidOperationException("Connection string 'DatabaseString' not found.");
         }
 
-        // Method to create a new JobRole asynchronously
         public async Task<JobRole> CreateJobRoleAsync(JobRole jobRole)
         {
             _context.JobRoles.Add(jobRole);
@@ -31,19 +29,16 @@ namespace AskHire_Backend.Data.Repositories
             return jobRole;
         }
 
-        // Method to retrieve a JobRole by its ID asynchronously
         public async Task<JobRole?> GetJobRoleByIdAsync(Guid id)
         {
             return await _context.JobRoles.FindAsync(id);
         }
 
-        // Method to retrieve all JobRoles asynchronously
         public async Task<IEnumerable<JobRole>> GetAllJobRolesAsync()
         {
             return await _context.JobRoles.ToListAsync();
         }
 
-        // Method to delete a JobRole asynchronously by its ID
         public async Task<bool> DeleteJobRoleAsync(Guid id)
         {
             var jobRole = await _context.JobRoles.FindAsync(id);
@@ -54,7 +49,6 @@ namespace AskHire_Backend.Data.Repositories
             return true;
         }
 
-        // Method to update an existing JobRole asynchronously
         public async Task<JobRole?> UpdateJobRoleAsync(JobRole jobRole)
         {
             var existingJobRole = await _context.JobRoles.FindAsync(jobRole.JobId);
@@ -65,7 +59,6 @@ namespace AskHire_Backend.Data.Repositories
             return existingJobRole;
         }
 
-        // Method to get the total number of JobRoles in the database
         public async Task<int> GetTotalJobsAsync()
         {
             using var connection = new SqlConnection(_connectionString);
@@ -77,20 +70,15 @@ namespace AskHire_Backend.Data.Repositories
             return result != null ? Convert.ToInt32(result) : 0;
         }
 
-        // Method to get the total number of JobRoles based on specific criteria from the provided JobRole
         public async Task<int> GetTotalJobsAsync(JobRole jobRole)
         {
-            // Implement filtering logic based on the properties of the provided JobRole, if needed.
-            
-            // Example: Count jobs with a specific title
             using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            // Example query to count jobs with the same JobTitle as the provided jobRole
             using var command = new SqlCommand(
                 "SELECT COUNT(*) FROM JobRoles WHERE JobTitle = @JobTitle", connection);
             command.Parameters.AddWithValue("@JobTitle", jobRole.JobTitle);
-            
+
             var result = await command.ExecuteScalarAsync();
             return result != null ? Convert.ToInt32(result) : 0;
         }
