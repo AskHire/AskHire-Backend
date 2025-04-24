@@ -1,4 +1,4 @@
-﻿using AskHire_Backend.Data.Entities;
+using AskHire_Backend.Data.Entities;
 using AskHire_Backend.Data.Repositories;
 using AskHire_Backend.Interfaces.Repositories;
 using AskHire_Backend.Interfaces.Services;
@@ -32,49 +32,49 @@ builder.Services.AddHttpClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// ✅ Register AppDbContext with SQL Server
+// ✅ Register AppDbContext with SQL Server and log SQL to console
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DatabaseString"))
-           //.EnableSensitiveDataLogging() // Enable sensitive data logging for better debugging
-           .LogTo(Console.WriteLine) // Log SQL queries to console
+           .LogTo(Console.WriteLine, LogLevel.Information)
 );
 
 // ✅ Register Repositories & Services
 builder.Services.AddScoped<IVacancyRepository, VacancyRepository>();
 builder.Services.AddScoped<IVacancyService, VacancyService>();
 
-// Register Question repository and service
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<IQuestionService, QuestionService>();
 
-// Register JobRole repository and service
 builder.Services.AddScoped<IJobRoleRepository, JobRoleRepository>();
 builder.Services.AddScoped<IJobRoleService, JobRoleService>();
+
 
 builder.Services.AddScoped<IInterviewRepository, InterviewRepository>();
 builder.Services.AddScoped<IInterviewService, InterviewService>();
 
-builder.Services.AddScoped<IPreScreenTestRepository, PreScreenTestRepository>();
-builder.Services.AddScoped<IPreScreenTestService, PreScreenTestService>();
 
-
-
+builder.Services.AddScoped<IReminderRepository, ReminderRepository>();
+builder.Services.AddScoped<IReminderService, ReminderService>();
 
 
 var app = builder.Build();
 
 // ✅ Enable Swagger for API Documentation
-app.UseSwagger();
-app.UseSwaggerUI(c =>
+if (app.Environment.IsDevelopment())
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "AskHire API v1");
-    c.RoutePrefix = string.Empty;  // Swagger loads as the default page
-});
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "AskHire API v1");
+        c.RoutePrefix = string.Empty; // Load Swagger as the root page
+    });
+}
 
 // ✅ Use Middleware
 app.UseCors("AllowAllOrigins");
 app.UseHttpsRedirection();
 app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();

@@ -1,6 +1,8 @@
-﻿using AskHire_Backend.Models.Entities;
+﻿using AskHire_Backend.Models.DTOs;
+using AskHire_Backend.Models.Entities;
 using AskHire_Backend.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
@@ -129,5 +131,21 @@ namespace AskHire_Backend.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+
+
+
+
+
+
+
+
+        //eshan
+        [HttpGet("JobWiseVacancies")]
+        public async Task<ActionResult<IEnumerable<JobWiseVacancyDto>>> GetJobWiseVacancies()
+        {
+            var vacancies = await _vacancyService.GetJobWiseVacanciesAsync();
+            return Ok(vacancies);
+        }
+
     }
 }
