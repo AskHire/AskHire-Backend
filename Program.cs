@@ -62,6 +62,17 @@ builder.Services.AddScoped<IAnswerCheckService, AnswerCheckService>();
 builder.Services.AddScoped<IReminderRepository, ReminderRepository>();
 builder.Services.AddScoped<IReminderService, ReminderService>();
 
+builder.Services.AddScoped<IAdminJobRoleRepository, AdminJobRoleRepository>();
+builder.Services.AddScoped<IAdminJobRoleService, AdminJobRoleService>();
+
+builder.Services.AddScoped<IAdminNotificationRepository, AdminNotificationRepository>();
+builder.Services.AddScoped<IAdminNotificationService, AdminNotificationService>();
+
+builder.Services.AddScoped<IAdminUserRepository, AdminUserRepository>();
+builder.Services.AddScoped<IAdminUserService, AdminUserService>();
+
+
+
 
 var app = builder.Build();
 
