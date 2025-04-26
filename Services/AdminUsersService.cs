@@ -36,7 +36,6 @@ namespace AskHire_Backend.Services
             existing.NIC = user.NIC;
             existing.MobileNumber = user.MobileNumber;
             existing.Address = user.Address;
-            existing.State = user.State;
             existing.Role = user.Role;
             existing.RefreshToken = user.RefreshToken;
             existing.RefreshTokenExpiryTime = user.RefreshTokenExpiryTime;
@@ -69,5 +68,8 @@ namespace AskHire_Backend.Services
             if (user == null || user.Role != role) return false;
             return await _userRepo.DeleteAsync(id);
         }
+
+        public async Task<int> GetTotalUsersAsync() =>
+            await _userRepo.GetTotalUsersAsync();
     }
 }
