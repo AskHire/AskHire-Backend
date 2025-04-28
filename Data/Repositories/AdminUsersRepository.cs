@@ -52,7 +52,7 @@ namespace AskHire_Backend.Repositories
             using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            using var command = new SqlCommand("SELECT COUNT(*) FROM Users", connection);
+            using var command = new SqlCommand("SELECT COUNT(*) FROM AspNetUsers WHERE role = 'candidate' ", connection);
             var result = await command.ExecuteScalarAsync();
 
             return result != null ? Convert.ToInt32(result) : 0;
