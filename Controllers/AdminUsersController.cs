@@ -33,7 +33,7 @@ namespace AskHire_Backend.Controllers
             return Ok(user);
         }
 
-        [HttpGet("total-users")]
+        [HttpGet("total-candidates")]
         public async Task<ActionResult<int>> GetTotalUsers()
         {
             try
