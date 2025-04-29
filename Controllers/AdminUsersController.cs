@@ -1,129 +1,65 @@
-﻿using AskHire_Backend.Models.Entities;
-using AskHire_Backend.Services.Interfaces;
+﻿using AskHire_Backend.Models.DTOs;
+using AskHire_Backend.Models.Entities;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace AskHire_Backend.Controllers
 {
-    [Route("api/adminusers")]
     [ApiController]
-    public class AdminUsersController : ControllerBase
+    [Route("api/[controller]")]
+    public class AdminUserController : ControllerBase
     {
-        private readonly IAdminUserService _userService;
+        private readonly UserManager<User> _userManager;
 
-        public AdminUsersController(IAdminUserService userService)
+        public AdminUserController(UserManager<User> userManager)
         {
-            _userService = userService;
+            _userManager = userManager;
         }
 
-        // General Users
-        [HttpGet("users")]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        // GET: api/AdminUser
+        [HttpGet]
+       
+        public async Task<IActionResult> GetAllUsers()
         {
-            return Ok(await _userService.GetAllUsersAsync());
+            var users = await _userManager.Users.ToListAsync();
+            return Ok(users);
         }
 
-        [HttpGet("users/{id}")]
-        public async Task<ActionResult<User>> GetUser(Guid id)
+        // PUT: api/AdminUser/UpdateRole
+        [HttpPut("UpdateRole")]
+        
+        public async Task<IActionResult> UpdateUserRole([FromBody] UpdateRoleDto request)
         {
-            var user = await _userService.GetUserByIdAsync(id);
-            if (user == null) return NotFound();
-            return Ok(user);
-        }
+            var user = await _userManager.FindByIdAsync(request.UserId.ToString());
+            if (user == null)
+                return NotFound("User not found.");
 
-        [HttpGet("total-users")]
-        public async Task<ActionResult<int>> GetTotalUsers()
-        {
-            try
-            {
-                var count = await _userService.GetTotalUsersAsync();
-                return Ok(count);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
+            user.Role = request.NewRole;
+            var result = await _userManager.UpdateAsync(user);
 
-            }
+            if (!result.Succeeded)
+                return BadRequest("Failed to update role.");
+
+            return Ok(new { message = "User role updated successfully." });
         }
 
 
-
-        [HttpPost("users")]
-        public async Task<ActionResult<User>> CreateUser(User user)
-        {
-            var createdUser = await _userService.CreateUserAsync(user);
-            return CreatedAtAction(nameof(GetUser), new { id = createdUser.Id }, createdUser); // Changed from UserId
-        }
-
-        [HttpPut("users/{id}")]
-        public async Task<IActionResult> UpdateUser(Guid id, User user)
-        {
-            var result = await _userService.UpdateUserAsync(id, user);
-            if (!result) return NotFound();
-            return NoContent();
-        }
-
-        [HttpPatch("users/{id}/role")]
-        public async Task<IActionResult> UpdateUserRole(Guid id, [FromBody] string newRole)
-        {
-            var result = await _userService.UpdateUserRoleAsync(id, newRole);
-            if (!result) return NotFound();
-            return NoContent();
-        }
-
-        [HttpDelete("users/{id}")]
+        [Authorize(Roles = "Admin")] // Only Admins can delete users
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
-            var result = await _userService.DeleteUserAsync(id);
-            if (!result) return NotFound();
-            return NoContent();
-        }
+            var user = await _userManager.FindByIdAsync(id.ToString());
+            if (user == null)
+                return NotFound("User not found.");
 
-        // Admins
-        [HttpGet("admins")]
-        public async Task<IActionResult> GetAdmins()
-        {
-            return Ok(await _userService.GetAdminsAsync());
-        }
+            var result = await _userManager.DeleteAsync(user);
 
-        [HttpDelete("admins/{id}")]
-        public async Task<IActionResult> DeleteAdmin(Guid id)
-        {
-            var result = await _userService.DeleteAdminAsync(id);
-            if (!result) return NotFound(new { message = "Admin not found" });
-            return NoContent();
-        }
+            if (!result.Succeeded)
+                return BadRequest("Failed to delete user.");
 
-        // Candidates
-        [HttpGet("candidates")]
-        public async Task<IActionResult> GetCandidates()
-        {
-            return Ok(await _userService.GetCandidatesAsync());
-        }
-
-        [HttpDelete("candidates/{id}")]
-        public async Task<IActionResult> DeleteCandidate(Guid id)
-        {
-            var result = await _userService.DeleteCandidateAsync(id);
-            if (!result) return NotFound(new { message = "Candidate not found" });
-            return NoContent();
-        }
-
-        // Managers
-        [HttpGet("managers")]
-        public async Task<IActionResult> GetManagers()
-        {
-            return Ok(await _userService.GetManagersAsync());
-        }
-
-        [HttpDelete("managers/{id}")]
-        public async Task<IActionResult> DeleteManager(Guid id)
-        {
-            var result = await _userService.DeleteManagerAsync(id);
-            if (!result) return NotFound(new { message = "Manager not found" });
-            return NoContent();
+            return Ok(new { message = "User deleted successfully." });
         }
     }
 }

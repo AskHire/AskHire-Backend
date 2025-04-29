@@ -29,7 +29,7 @@ namespace AskHire_Backend.Services
             return jobRole;
         }
 
-        public async Task<JobRole> UpdateAsync(Guid jobId, JobRole jobRole)
+        public async Task<JobRole?> UpdateAsync(Guid jobId, JobRole jobRole)
         {
             var existing = await _repository.GetByIdAsync(jobId);
             if (existing == null) return null;
