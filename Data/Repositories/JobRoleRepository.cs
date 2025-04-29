@@ -59,16 +59,16 @@ namespace AskHire_Backend.Data.Repositories
             return existingJobRole;
         }
 
-        public async Task<int> GetTotalJobsAsync()
-        {
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
+        // public async Task<int> GetTotalJobsAsync()
+        // {
+        //     using var connection = new SqlConnection(_connectionString);
+        //     await connection.OpenAsync();
 
-            using var command = new SqlCommand("SELECT COUNT(*) FROM JobRoles", connection);
-            var result = await command.ExecuteScalarAsync();
+        //     using var command = new SqlCommand("SELECT COUNT(*) FROM JobRoles", connection);
+        //     var result = await command.ExecuteScalarAsync();
 
-            return result != null ? Convert.ToInt32(result) : 0;
-        }
+        //     return result != null ? Convert.ToInt32(result) : 0;
+        // }
 
         public async Task<int> GetTotalJobsAsync(JobRole jobRole)
         {

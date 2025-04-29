@@ -110,9 +110,8 @@ builder.Services.AddScoped<IAdminJobRoleService, AdminJobRoleService>();
 builder.Services.AddScoped<IAdminNotificationRepository, AdminNotificationRepository>();
 builder.Services.AddScoped<IAdminNotificationService, AdminNotificationService>();
 
-builder.Services.AddScoped<IAdminUserRepository, AdminUserRepository>();
-builder.Services.AddScoped<IAdminUserService, AdminUserService>();
-
+builder.Services.AddScoped<IManagerDashboardRepository, ManagerDashboardRepository>();
+builder.Services.AddScoped<IManagerDashboardService, ManagerDashboardService>();
 
 var app = builder.Build();
 
