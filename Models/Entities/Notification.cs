@@ -10,7 +10,7 @@ namespace AskHire_Backend.Models.Entities
         public Guid NotificationId { get; set; }
 
         public required string Message { get; set; }
-
+        public required DateTime Time { get; set; }
         public required string Type { get; set; }
         public required string Subject { get; set; }
     }

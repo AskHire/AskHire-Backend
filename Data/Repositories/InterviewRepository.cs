@@ -70,7 +70,7 @@ namespace AskHire_Backend.Repositories
                     VacancyName = i.Application.Vacancy.VacancyName,
                     InterviewDate = i.Date,
                     InterviewTime = i.Time,
-                    Instructions = i.Instructions
+                    InterviewInstructions = i.Instructions
                 })
                 .ToListAsync();
         }

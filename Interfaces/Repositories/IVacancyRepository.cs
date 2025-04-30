@@ -1,4 +1,5 @@
-﻿using AskHire_Backend.Models.Entities;
+﻿using AskHire_Backend.Models.DTOs;
+using AskHire_Backend.Models.Entities;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -12,5 +13,8 @@ namespace AskHire_Backend.Interfaces.Repositories
         Task<IEnumerable<Vacancy>> GetAllVacanciesAsync();
         Task<bool> DeleteVacancyAsync(Guid id);
         Task<Vacancy?> UpdateVacancyAsync(Vacancy vacancy);
+
+        //eshan
+        Task<IEnumerable<JobWiseVacancyDto>> GetJobWiseVacanciesAsync();
     }
 }

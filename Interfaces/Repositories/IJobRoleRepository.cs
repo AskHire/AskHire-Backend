@@ -12,5 +12,7 @@ namespace AskHire_Backend.Interfaces.Repositories
         Task<IEnumerable<JobRole>> GetAllJobRolesAsync();
         Task<bool> DeleteJobRoleAsync(Guid id);
         Task<JobRole?> UpdateJobRoleAsync(JobRole jobRole);
+        // Task<int> GetTotalJobsAsync();
+        // Removed: Task<int> GetTotalJobsAsync(JobRole);
     }
 }

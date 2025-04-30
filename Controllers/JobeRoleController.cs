@@ -77,7 +77,24 @@ namespace AskHire_Backend.Controllers
             }
         }
 
-        // PUT: api/JobRole/{id}
+
+        // [HttpGet("total-jobs")]
+        // public async Task<IActionResult> GetTotalJobs()
+        // {
+        //     try
+        //     {
+        //         var count = await _jobRoleService.GetTotalJobsAsync();
+        //         return Ok(count);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         _logger.LogError(ex, "Error fetching total jobs count.");
+        //         return StatusCode(500, new { message = ex.Message });
+        //     }
+        // }
+
+
+        // PUT: api/jobrole/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateJobRole(Guid id, [FromBody] JobRole jobRole)
         {
