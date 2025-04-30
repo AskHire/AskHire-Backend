@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace AskHire_Backend.Services
+namespace AskHire_Backend.Interfaces.Services.IManagerServices
 {
-    public interface INotificationService
+    public interface IManagerNotificationService
     {
         Task<Notification> CreateNotificationAsync(Notification notification);
         Task<IEnumerable<Notification>> GetAllNotificationsAsync();

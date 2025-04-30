@@ -1,13 +1,13 @@
-﻿using AskHire_Backend.Models.Entities;
-using AskHire_Backend.Services.Interfaces;
+﻿using AskHire_Backend.Interfaces.Services.IManagerServices;
+using AskHire_Backend.Models.Entities;
 using System;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
 
-namespace AskHire_Backend.Services
+namespace AskHire_Backend.Services.ManagerServices
 {
-    public class EmailService : IEmailService
+    public class ManagerEmailService : IManagerEmailService
     {
         public async Task<bool> SendInterviewEmailAsync(string recipientEmail, Interview interview)
         {
@@ -22,10 +22,10 @@ namespace AskHire_Backend.Services
                 var toAddress = new MailAddress(recipientEmail);
                 const string subject = "Interview Invitation";
                 string body = $@"Dear Candidate,
-You are invited to an interview scheduled on {interview.Date.ToShortDateString()} at {interview.Time}.
-Instructions: {interview.Instructions}
-Best regards,
-Your Company";
+                You are invited to an interview scheduled on {interview.Date.ToShortDateString()} at {interview.Time}.
+                Instructions: {interview.Interview_Instructions}
+                Best regards,
+                Your Company";
 
                 using (var smtpClient = new SmtpClient("smtp.gmail.com")
                 {

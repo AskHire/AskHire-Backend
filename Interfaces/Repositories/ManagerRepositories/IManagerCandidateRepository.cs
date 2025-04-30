@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using System.Threading.Tasks;
 using AskHire_Backend.Models;
 
-namespace AskHire_Backend.Interfaces.Repositories
+namespace AskHire_Backend.Interfaces.Repositories.ManagerRepositories
 {
-    public interface ICandidateRepository
+    public interface IManagerCandidateRepository
     {
         Task<IEnumerable<object>> GetAllApplicationsAsync();
         Task<object> GetApplicationByIdAsync(Guid applicationId);

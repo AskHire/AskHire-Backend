@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AskHire_Backend.Models.DTOs
+namespace AskHire_Backend.Models.DTOs.ManagerDTOs
 {
     public class CandidateStatisticsDto
     {

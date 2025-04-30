@@ -1,7 +1,6 @@
 ﻿// Repositories/CandidateRepository.cs
 using AskHire_Backend.Data;
 using AskHire_Backend.Data.Entities;
-using AskHire_Backend.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,14 +8,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using AskHire_Backend.Models;
 using AskHire_Backend.Models.Entities;
+using AskHire_Backend.Interfaces.Repositories.ManagerRepositories;
 
-namespace AskHire_Backend.Repositories
+namespace AskHire_Backend.Data.Repositories.ManagerRepositories
 {
-    public class CandidateRepository : ICandidateRepository
+    public class ManagerCandidateRepository : IManagerCandidateRepository
     {
         private readonly AppDbContext _context;
 
-        public CandidateRepository(AppDbContext context)
+        public ManagerCandidateRepository(AppDbContext context)
         {
             _context = context;
         }

@@ -1,17 +1,18 @@
 ﻿using AskHire_Backend.Data.Entities;
+using AskHire_Backend.Interfaces.Repositories.ManagerRepositories;
 using AskHire_Backend.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace AskHire_Backend.Data.Repositories
+namespace AskHire_Backend.Data.Repositories.ManagerRepositories
 {
-    public class NotificationRepository : INotificationRepository
+    public class ManagerNotificationRepository : IManagerNotificationRepository
     {
         private readonly AppDbContext _context;
 
-        public NotificationRepository(AppDbContext context)
+        public ManagerNotificationRepository(AppDbContext context)
         {
             _context = context;
         }

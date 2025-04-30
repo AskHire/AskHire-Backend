@@ -5,14 +5,15 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using AskHire_Backend.Data.Entities;
+using AskHire_Backend.Interfaces.Services.IManagerServices;
 
-namespace AskHire_Backend.Services
+namespace AskHire_Backend.Services.ManagerServices
 {
-    public class NotificationService : INotificationService
+    public class ManagerNotificationService : IManagerNotificationService
     {
         private readonly AppDbContext _context;
 
-        public NotificationService(AppDbContext context)
+        public ManagerNotificationService(AppDbContext context)
         {
             _context = context;
         }

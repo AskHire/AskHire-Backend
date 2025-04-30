@@ -1,15 +1,10 @@
 using AskHire_Backend.Data;
 using AskHire_Backend.Data.Entities;
 using AskHire_Backend.Models.DTOs;
-using AskHire_Backend.Models.Entities;
 using AskHire_Backend.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace AskHire_Backend.Repositories
+namespace AskHire_Backend.Repositories.Implementations
 {
     public class InterviewRepository : IInterviewRepository
     {
@@ -20,43 +15,7 @@ namespace AskHire_Backend.Repositories
             _context = context;
         }
 
-        // Change the return type to Application if Apply doesn't exist
-        public async Task<Application> GetApplicationWithUserAsync(Guid applicationId)
-        {
-            return await _context.Applies
-                .Include(a => a.User)
-                .FirstOrDefaultAsync(a => a.ApplicationId == applicationId);
-        }
-
-        public async Task<Interview> CreateInterviewAsync(Interview interview)
-        {
-            _context.Interviews.Add(interview);
-            await _context.SaveChangesAsync();
-            return interview;
-        }
-
-        public async Task<Interview> UpdateInterviewAsync(Interview interview)
-        {
-            _context.Interviews.Update(interview);
-            await _context.SaveChangesAsync();
-            return interview;
-        }
-
-        public async Task<Interview> GetInterviewByApplicationIdAsync(Guid applicationId)
-        {
-            return await _context.Interviews
-                .FirstOrDefaultAsync(i => i.ApplicationId == applicationId);
-        }
-
-        public async Task<List<Interview>> GetAllInterviewsAsync()
-        {
-            return await _context.Interviews
-                .Include(i => i.Application)
-                    .ThenInclude(a => a.User)
-                .ToListAsync();
-        }
-
-        public async Task<List<Models.DTOs.UserInterviewDetailsDto>> GetInterviewsByUserIdAsync(Guid userId)
+        public async Task<List<UserInterviewDetailsDto>> GetInterviewsByUserIdAsync(Guid userId)
         {
             return await _context.Interviews
                 .Include(i => i.Application)
@@ -70,11 +29,9 @@ namespace AskHire_Backend.Repositories
                     VacancyName = i.Application.Vacancy.VacancyName,
                     InterviewDate = i.Date,
                     InterviewTime = i.Time,
-                    InterviewInstructions = i.Instructions
+                    InterviewInstructions = i.Interview_Instructions
                 })
                 .ToListAsync();
         }
-
     }
 }
-

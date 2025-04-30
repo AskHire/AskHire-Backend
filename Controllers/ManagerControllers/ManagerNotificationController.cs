@@ -1,18 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using AskHire_Backend.Models.Entities;
-using AskHire_Backend.Services;
 using System;
 using System.Threading.Tasks;
+using AskHire_Backend.Interfaces.Services.IManagerServices;
 
-namespace AskHire_Backend.Controllers
+namespace AskHire_Backend.Controllers.Manager
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class NotificationController : ControllerBase
+    public class ManagerNotificationController : ControllerBase
     {
-        private readonly INotificationService _notificationService;
+        private readonly IManagerNotificationService _notificationService;
 
-        public NotificationController(INotificationService notificationService)
+        public ManagerNotificationController(IManagerNotificationService notificationService)
         {
             _notificationService = notificationService;
         }

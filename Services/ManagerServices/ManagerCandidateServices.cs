@@ -1,6 +1,6 @@
 ﻿// Services/CandidateService.cs
-using AskHire_Backend.Interfaces.Repositories;
-using AskHire_Backend.Interfaces.Services;
+using AskHire_Backend.Interfaces.Repositories.ManagerRepositories;
+using AskHire_Backend.Interfaces.Services.IManagerServices;
 using AskHire_Backend.Models.Entities;
 using System;
 using System.Collections.Generic;
@@ -8,13 +8,13 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace AskHire_Backend.Services
+namespace AskHire_Backend.Services.ManagerServices
 {
-    public class CandidateService : ICandidateService
+    public class CandidateService : IManagerCandidateService
     {
-        private readonly ICandidateRepository _candidateRepository;
+        private readonly IManagerCandidateRepository _candidateRepository;
 
-        public CandidateService(ICandidateRepository candidateRepository)
+        public CandidateService(IManagerCandidateRepository candidateRepository)
         {
             _candidateRepository = candidateRepository;
         }

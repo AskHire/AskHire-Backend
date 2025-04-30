@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace AskHire_Backend.Interfaces.Services
+namespace AskHire_Backend.Interfaces.Services.IManagerServices
 {
-    public interface ICandidateService
+    public interface IManagerCandidateService
     {
         Task<IEnumerable<object>> GetAllApplicationsAsync();
         Task<object> GetApplicationByIdAsync(Guid applicationId);

@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace AskHire_Backend.Data.Repositories
+namespace AskHire_Backend.Interfaces.Repositories.ManagerRepositories
 {
-    public interface INotificationRepository
+    public interface IManagerNotificationRepository
     {
         Task<Notification?> GetByIdAsync(Guid id);
         Task<IEnumerable<Notification>> GetAllAsync();
