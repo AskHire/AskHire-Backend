@@ -8,6 +8,7 @@ using AskHire_Backend.Interfaces.Services;
 namespace AskHire_Backend.Services
 {
     public class JobRoleService : IJobRoleService
+
     {
         private readonly IJobRoleRepository _jobRoleRepository;
 

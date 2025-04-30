@@ -1,3 +1,4 @@
+using AskHire_Backend.Interfaces.Services;
 using AskHire_Backend.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,39 +8,32 @@ namespace AskHire_Backend.Controllers
     [ApiController]
     public class JobRoleController : ControllerBase
     {
-        private readonly Interfaces.Services.IJobRoleService _jobRoleService;
+        private readonly IJobRoleService _jobRoleService;
         private readonly ILogger<JobRoleController> _logger;
 
-        public JobRoleController(Interfaces.Services.IJobRoleService jobRoleService, ILogger<JobRoleController> logger)
+        public JobRoleController(IJobRoleService jobRoleService, ILogger<JobRoleController> logger)
         {
             _jobRoleService = jobRoleService ?? throw new ArgumentNullException(nameof(jobRoleService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        // POST: api/jobrole
-        [HttpPost]
-        public async Task<ActionResult<JobRole>> CreateJobRole([FromBody] JobRole jobRole)
+        // GET: api/JobRole
+        [HttpGet]
+        public async Task<IActionResult> GetJobRoles()
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
             try
             {
-                var createdJobRole = await _jobRoleService.CreateJobRoleAsync(jobRole);
-                return CreatedAtAction(nameof(GetJobRoleById), new { id = createdJobRole.JobId }, createdJobRole);
-            }
-            catch (ArgumentNullException ex)
-            {
-                _logger.LogError(ex, "Null job role data provided");
-                return BadRequest(new { message = ex.Message });
+                var jobRoles = await _jobRoleService.GetAllJobRolesAsync();
+                return Ok(jobRoles);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while creating job role");
+                _logger.LogError(ex, "Error retrieving all job roles");
                 return StatusCode(500, new { message = ex.Message });
             }
         }
 
-        // GET: api/jobrole/{id}
+        // GET: api/JobRole/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetJobRoleById(Guid id)
         {
@@ -60,18 +54,25 @@ namespace AskHire_Backend.Controllers
             }
         }
 
-        // GET: api/jobrole
-        [HttpGet]
-        public async Task<IActionResult> GetAllJobRoles()
+        // POST: api/JobRole
+        [HttpPost]
+        public async Task<ActionResult<JobRole>> CreateJobRole([FromBody] JobRole jobRole)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
             try
             {
-                var jobRoles = await _jobRoleService.GetAllJobRolesAsync();
-                return Ok(jobRoles);
+                var createdJobRole = await _jobRoleService.CreateJobRoleAsync(jobRole);
+                return CreatedAtAction(nameof(GetJobRoleById), new { id = createdJobRole.JobId }, createdJobRole);
+            }
+            catch (ArgumentNullException ex)
+            {
+                _logger.LogError(ex, "Null job role data provided");
+                return BadRequest(new { message = ex.Message });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving all job roles");
+                _logger.LogError(ex, "Error occurred while creating job role");
                 return StatusCode(500, new { message = ex.Message });
             }
         }
@@ -127,7 +128,7 @@ namespace AskHire_Backend.Controllers
             }
         }
 
-        // DELETE: api/jobrole/{id}
+        // DELETE: api/JobRole/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteJobRole(Guid id)
         {
