@@ -10,9 +10,10 @@ namespace AskHire_Backend.Models.Entities
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid ApplicationId { get; set; }
         public required int CV_Mark { get; set; }
-        public required string CVFilePath { get; set; }
+        public string? CVFilePath { get; set; }  // Nullable
         public required int Pre_Screen_PassMark { get; set; }
         public required string Status { get; set; }
+        public string DashboardStatus { get; set; }
 
 
         [ForeignKey("User")]

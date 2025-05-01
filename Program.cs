@@ -13,6 +13,10 @@ using AskHire_Backend.Services;
 using AskHire_Backend.Services.Implementations;
 using AskHire_Backend.Services.Interfaces;
 using AskHire_Backend.Services.ManagerServices;
+using fileupload;
+using fileupload.Interfaces;
+using fileupload.Repositories;
+using fileupload.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +40,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<CandidateFileService>();
 
 // DB Context
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -131,8 +136,11 @@ builder.Services.AddScoped<IManagerInterviewService, ManagerInterviewService>();
 builder.Services.AddScoped<IManagerNotificationRepository, ManagerNotificationRepository>();
 builder.Services.AddScoped<IManagerNotificationService, ManagerNotificationService>();
 
-builder.Services.AddScoped<IManagerEmailService, ManagerEmailService>();
 
+builder.Services.AddScoped<ICandidateFileRepository, CandidateFileRepository>();
+builder.Services.AddScoped<ICandidateFileService, CandidateFileService>();
+
+builder.Services.AddScoped<IManagerEmailService, ManagerEmailService>();
 
 
 var app = builder.Build();
