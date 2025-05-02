@@ -1,7 +1,10 @@
 using AskHire_Backend.Data.Entities;
 using AskHire_Backend.Data.Repositories;
+using AskHire_Backend.Data.Repositories.ManagerRepositories;
 using AskHire_Backend.Interfaces.Repositories;
+using AskHire_Backend.Interfaces.Repositories.ManagerRepositories;
 using AskHire_Backend.Interfaces.Services;
+using AskHire_Backend.Interfaces.Services.IManagerServices;
 using AskHire_Backend.Models.Entities;
 using AskHire_Backend.Repositories;
 using AskHire_Backend.Repositories.Implementations;
@@ -9,6 +12,11 @@ using AskHire_Backend.Repositories.Interfaces;
 using AskHire_Backend.Services;
 using AskHire_Backend.Services.Implementations;
 using AskHire_Backend.Services.Interfaces;
+using AskHire_Backend.Services.ManagerServices;
+using fileupload;
+using fileupload.Interfaces;
+using fileupload.Repositories;
+using fileupload.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -32,6 +40,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<CandidateFileService>();
 
 // DB Context
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -117,6 +126,21 @@ builder.Services.AddScoped<IManagerDashboardService, ManagerDashboardService>();
 builder.Services.AddScoped<IAdminDashboardRepository, AdminDashboardRepository>();
 builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
 
+builder.Services.AddScoped<IManagerCandidateRepository, ManagerCandidateRepository>();
+builder.Services.AddScoped<IManagerCandidateService, CandidateService>();
+
+
+builder.Services.AddScoped<IManagerInterviewRepository, ManagerInterviewRepository>();
+builder.Services.AddScoped<IManagerInterviewService, ManagerInterviewService>();
+
+builder.Services.AddScoped<IManagerNotificationRepository, ManagerNotificationRepository>();
+builder.Services.AddScoped<IManagerNotificationService, ManagerNotificationService>();
+
+
+builder.Services.AddScoped<ICandidateFileRepository, CandidateFileRepository>();
+builder.Services.AddScoped<ICandidateFileService, CandidateFileService>();
+
+builder.Services.AddScoped<IManagerEmailService, ManagerEmailService>();
 
 
 var app = builder.Build();
