@@ -1,5 +1,4 @@
-﻿// Services/CandidateService.cs
-using AskHire_Backend.Interfaces.Repositories.ManagerRepositories;
+﻿using AskHire_Backend.Interfaces.Repositories.ManagerRepositories;
 using AskHire_Backend.Interfaces.Services.IManagerServices;
 using AskHire_Backend.Models.Entities;
 using System;
@@ -19,14 +18,11 @@ namespace AskHire_Backend.Services.ManagerServices
             _candidateRepository = candidateRepository;
         }
 
-
         // Fetch all available vacancies
         public async Task<IEnumerable<Vacancy>> GetVacanciesAsync()
         {
             return await _candidateRepository.GetVacanciesAsync(); // Fetch vacancies from repository
         }
-
-
 
         public async Task<IEnumerable<object>> GetAllApplicationsAsync()
         {
@@ -55,10 +51,11 @@ namespace AskHire_Backend.Services.ManagerServices
                 throw new ArgumentException("Status must not be empty.");
             }
 
+            // Updated acceptable status values to include "longlist"
             string normalizedStatus = status.ToLower();
-            if (!new[] { "qualified", "rejected", "pending" }.Contains(normalizedStatus))
+            if (!new[] { "longlist", "rejected", "pending" }.Contains(normalizedStatus))
             {
-                throw new ArgumentException("Status must be 'qualified', 'rejected', or 'pending'.");
+                throw new ArgumentException("Status must be 'longlist', 'rejected', or 'pending'.");
             }
 
             return await _candidateRepository.GetApplicationsByStatusAsync(normalizedStatus);
@@ -97,14 +94,15 @@ namespace AskHire_Backend.Services.ManagerServices
 
         public async Task<object> GetStatisticsAsync()
         {
-            int qualified = await _candidateRepository.GetApplicationCountByStatusAsync("qualified");
+            // Updated to use "longlist" instead of "qualified"
+            int longlist = await _candidateRepository.GetApplicationCountByStatusAsync("longlist");
             int rejected = await _candidateRepository.GetApplicationCountByStatusAsync("rejected");
             int pending = await _candidateRepository.GetApplicationCountByStatusAsync("pending");
-            int total = qualified + rejected + pending;
+            int total = longlist + rejected + pending;
 
             return new
             {
-                Qualified = qualified,
+                Longlist = longlist,
                 Rejected = rejected,
                 Pending = pending,
                 Total = total
@@ -119,15 +117,16 @@ namespace AskHire_Backend.Services.ManagerServices
                 throw new KeyNotFoundException($"No vacancy found with id {vacancyId}");
             }
 
-            int qualified = await _candidateRepository.GetApplicationCountByVacancyAndStatusAsync(vacancyId, "qualified");
+            // Updated to use "longlist" instead of "qualified"
+            int longlist = await _candidateRepository.GetApplicationCountByVacancyAndStatusAsync(vacancyId, "longlist");
             int rejected = await _candidateRepository.GetApplicationCountByVacancyAndStatusAsync(vacancyId, "rejected");
             int pending = await _candidateRepository.GetApplicationCountByVacancyAndStatusAsync(vacancyId, "pending");
-            int total = qualified + rejected + pending;
+            int total = longlist + rejected + pending;
 
             return new
             {
                 VacancyId = vacancyId,
-                Qualified = qualified,
+                Longlist = longlist,
                 Rejected = rejected,
                 Pending = pending,
                 Total = total

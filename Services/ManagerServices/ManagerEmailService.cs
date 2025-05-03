@@ -21,11 +21,26 @@ namespace AskHire_Backend.Services.ManagerServices
                 var fromAddress = new MailAddress("youremail@example.com", "Your Company");
                 var toAddress = new MailAddress(recipientEmail);
                 const string subject = "Interview Invitation";
+
+                // Format the duration as hours and minutes
+                string durationFormat = interview.Duration.Hours > 0
+                    ? $"{interview.Duration.Hours} hour{(interview.Duration.Hours != 1 ? "s" : "")}"
+                    : "";
+
+                if (interview.Duration.Minutes > 0)
+                {
+                    durationFormat += durationFormat.Length > 0 ? " and " : "";
+                    durationFormat += $"{interview.Duration.Minutes} minute{(interview.Duration.Minutes != 1 ? "s" : "")}";
+                }
+
                 string body = $@"Dear Candidate,
-                You are invited to an interview scheduled on {interview.Date.ToShortDateString()} at {interview.Time}.
-                Instructions: {interview.Interview_Instructions}
-                Best regards,
-                Your Company";
+
+You are invited to an interview scheduled on {interview.Date.ToShortDateString()} at {interview.Time}.
+Duration: {durationFormat}
+Instructions: {interview.Interview_Instructions}
+
+Best regards,
+Your Company";
 
                 using (var smtpClient = new SmtpClient("smtp.gmail.com")
                 {
