@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace AskHire_Backend.Services.ManagerServices
 {
-    public class CandidateService : IManagerCandidateService
+    public class ManagerCandidateService : IManagerCandidateService
     {
         private readonly IManagerCandidateRepository _candidateRepository;
 
-        public CandidateService(IManagerCandidateRepository candidateRepository)
+        public ManagerCandidateService(IManagerCandidateRepository candidateRepository)
         {
             _candidateRepository = candidateRepository;
         }
