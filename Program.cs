@@ -129,7 +129,7 @@ builder.Services.AddScoped<IAdminDashboardRepository, AdminDashboardRepository>(
 builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
 
 builder.Services.AddScoped<IManagerCandidateRepository, ManagerCandidateRepository>();
-builder.Services.AddScoped<IManagerCandidateService, CandidateService>();
+builder.Services.AddScoped<IManagerCandidateService, ManagerCandidateService>();
 
 
 builder.Services.AddScoped<IManagerInterviewRepository, ManagerInterviewRepository>();
