@@ -24,5 +24,20 @@ namespace AskHire_Backend.Controllers
             var vacancies = await _candidateVacancyService.GetJobWiseVacanciesAsync();
             return Ok(vacancies);
         }
+
+        [HttpGet("MostApplied")]
+        public async Task<ActionResult<IEnumerable<CandidateVacancyDto>>> GetMostAppliedVacancies()
+        {
+            var vacancies = await _candidateVacancyService.GetMostAppliedVacanciesAsync();
+            return Ok(vacancies);
+        }
+
+        [HttpGet("Latest")]
+        public async Task<ActionResult<IEnumerable<CandidateVacancyDto>>> GetLatestVacancies()
+        {
+            var vacancies = await _candidateVacancyService.GetLatestVacanciesAsync();
+            return Ok(vacancies);
+        }
+
     }
 }
