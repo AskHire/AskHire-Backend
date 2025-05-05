@@ -52,13 +52,5 @@ namespace AskHire_Backend.Services
         }
 
 
-
-
-
-        //eshan
-        public async Task<IEnumerable<JobWiseVacancyDto>> GetJobWiseVacanciesAsync()
-        {
-            return await _vacancyRepository.GetJobWiseVacanciesAsync();
-        }
     }
 }

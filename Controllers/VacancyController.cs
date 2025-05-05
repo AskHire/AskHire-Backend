@@ -135,17 +135,5 @@ namespace AskHire_Backend.Controllers
 
 
 
-
-
-
-
-        //eshan
-        [HttpGet("JobWiseVacancies")]
-        public async Task<ActionResult<IEnumerable<JobWiseVacancyDto>>> GetJobWiseVacancies()
-        {
-            var vacancies = await _vacancyService.GetJobWiseVacanciesAsync();
-            return Ok(vacancies);
-        }
-
     }
 }
