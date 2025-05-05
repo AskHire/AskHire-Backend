@@ -149,6 +149,11 @@ builder.Services.AddScoped<ICandidateFileRepository, CandidateFileRepository>();
 builder.Services.AddScoped<ICandidateFileService, CandidateFileService>();
 
 
+builder.Services.AddScoped<ICandidateDashboardRepository, CandidateDashboardRepository>();
+builder.Services.AddScoped<ICandidateDashboardService, CandidateDashboardService>();
+
+
+
 var app = builder.Build();
 
 // CORS
