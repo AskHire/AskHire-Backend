@@ -145,6 +145,9 @@ builder.Services.AddScoped<IManagerLongListInterviewService, ManagerLongListInte
 builder.Services.AddScoped<IManagerEmailService, ManagerEmailService>();
 builder.Services.AddScoped<IManagerLonglistIVacancyRepository, ManagerLonglistVacancyRepository>();
 
+builder.Services.AddScoped<ICandidateFileRepository, CandidateFileRepository>();
+builder.Services.AddScoped<ICandidateFileService, CandidateFileService>();
+
 
 var app = builder.Build();
 
