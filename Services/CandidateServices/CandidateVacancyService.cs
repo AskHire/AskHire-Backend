@@ -18,5 +18,16 @@ namespace AskHire_Backend.Services
         {
             return await _candidateVacancyRepository.GetJobWiseVacanciesAsync();
         }
+
+        public async Task<IEnumerable<CandidateVacancyDto>> GetMostAppliedVacanciesAsync()
+        {
+            return await _candidateVacancyRepository.GetMostAppliedVacanciesAsync();
+        }
+
+        public async Task<IEnumerable<CandidateVacancyDto>> GetLatestVacanciesAsync()
+        {
+            return await _candidateVacancyRepository.GetLatestVacanciesAsync();
+        }
+
     }
 }

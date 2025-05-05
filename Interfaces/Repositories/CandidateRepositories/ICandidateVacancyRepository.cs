@@ -7,5 +7,8 @@ namespace AskHire_Backend.Repositories
     public interface ICandidateVacancyRepository
     {
         Task<IEnumerable<CandidateVacancyDto>> GetJobWiseVacanciesAsync();
+        Task<IEnumerable<CandidateVacancyDto>> GetMostAppliedVacanciesAsync();
+        Task<IEnumerable<CandidateVacancyDto>> GetLatestVacanciesAsync();
+
     }
 }
