@@ -153,6 +153,10 @@ builder.Services.AddScoped<ICandidateDashboardRepository, CandidateDashboardRepo
 builder.Services.AddScoped<ICandidateDashboardService, CandidateDashboardService>();
 
 
+builder.Services.AddScoped<ICandidateVacancyRepository, CandidateVacancyRepository>();
+builder.Services.AddScoped<ICandidateVacancyService, CandidateVacancyService>();
+
+
 
 var app = builder.Build();
 
