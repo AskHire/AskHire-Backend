@@ -28,7 +28,7 @@ namespace AskHire_Backend.Controllers
             return Ok(job);
         }
 
-        
+
 
         [HttpPost]
         public async Task<ActionResult<JobRole>> CreateJobRole(JobRole jobRole)

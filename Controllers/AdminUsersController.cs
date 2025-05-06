@@ -20,7 +20,7 @@ namespace AskHire_Backend.Controllers
 
         // GET: api/AdminUser
         [HttpGet]
-       
+
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _userManager.Users.ToListAsync();
@@ -29,7 +29,7 @@ namespace AskHire_Backend.Controllers
 
         // PUT: api/AdminUser/UpdateRole
         [HttpPut("UpdateRole")]
-        
+
         public async Task<IActionResult> UpdateUserRole([FromBody] UpdateRoleDto request)
         {
             var user = await _userManager.FindByIdAsync(request.UserId.ToString());
