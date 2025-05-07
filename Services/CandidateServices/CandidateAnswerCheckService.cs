@@ -1,14 +1,14 @@
-﻿using AskHire_Backend.Models.DTOs;
-using AskHire_Backend.Repositories.Interfaces;
-using AskHire_Backend.Services.Interfaces;
+﻿using AskHire_Backend.Interfaces.Repositories.CandidateRepositories;
+using AskHire_Backend.Interfaces.Services.ICandidateServices;
+using AskHire_Backend.Models.DTOs.CandidateDTOs;
 
-namespace AskHire_Backend.Services
+namespace AskHire_Backend.Services.CandidateServices
 {
-    public class AnswerCheckService : IAnswerCheckService
+    public class CandidateAnswerCheckService : ICandidateAnswerCheckService
     {
-        private readonly IAnswerCheckRepository _repository;
+        private readonly ICandidateAnswerCheckRepository _repository;
 
-        public AnswerCheckService(IAnswerCheckRepository repository)
+        public CandidateAnswerCheckService(ICandidateAnswerCheckRepository repository)
         {
             _repository = repository;
         }

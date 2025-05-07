@@ -1,4 +1,4 @@
-﻿namespace AskHire_Backend.Models.DTOs
+﻿namespace AskHire_Backend.Models.DTOs.CandidateDTOs
 {
     public class UserInterviewDetailsDto
     {

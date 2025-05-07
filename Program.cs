@@ -1,22 +1,20 @@
 using AskHire_Backend.Data.Entities;
 using AskHire_Backend.Data.Repositories;
+using AskHire_Backend.Data.Repositories.CandidateRepositories;
 using AskHire_Backend.Data.Repositories.ManagerRepositories;
 using AskHire_Backend.Interfaces.Repositories;
+using AskHire_Backend.Interfaces.Repositories.CandidateRepositories;
 using AskHire_Backend.Interfaces.Repositories.ManagerRepositories;
 using AskHire_Backend.Interfaces.Services;
+using AskHire_Backend.Interfaces.Services.ICandidateServices;
 using AskHire_Backend.Interfaces.Services.IManagerServices;
 using AskHire_Backend.Models.Entities;
 using AskHire_Backend.Repositories;
-using AskHire_Backend.Repositories.Implementations;
 using AskHire_Backend.Repositories.Interfaces;
 using AskHire_Backend.Services;
-using AskHire_Backend.Services.Implementations;
+using AskHire_Backend.Services.CandidateServices;
 using AskHire_Backend.Services.Interfaces;
 using AskHire_Backend.Services.ManagerServices;
-using fileupload;
-using fileupload.Interfaces;
-using fileupload.Repositories;
-using fileupload.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -100,14 +98,14 @@ builder.Services.AddScoped<IJobRoleRepository, JobRoleRepository>();
 builder.Services.AddScoped<IJobRoleService, JobRoleService>();
 
 
-builder.Services.AddScoped<IInterviewRepository, InterviewRepository>();
-builder.Services.AddScoped<IInterviewService, InterviewService>();
+builder.Services.AddScoped<ICandidateInterviewRepository, CandidateInterviewRepository>();
+builder.Services.AddScoped<ICandidateInterviewService, CandidateInterviewService>();
 
-builder.Services.AddScoped<IPreScreenTestRepository, PreScreenTestRepository>();
-builder.Services.AddScoped<IPreScreenTestService, PreScreenTestService>();
+builder.Services.AddScoped<ICandidatePreScreenTestRepository, CandidatePreScreenTestRepository>();
+builder.Services.AddScoped<ICandidatePreScreenTestService, CandidatePreScreenTestService>();
 
-builder.Services.AddScoped<IAnswerCheckRepository, AnswerCheckRepository>();
-builder.Services.AddScoped<IAnswerCheckService, AnswerCheckService>();
+builder.Services.AddScoped<ICandidateAnswerCheckRepository, CandidateAnswerCheckRepository>();
+builder.Services.AddScoped<ICandidateAnswerCheckService, CandidateAnswerCheckService>();
 
 
 builder.Services.AddScoped<IReminderRepository, ReminderRepository>();

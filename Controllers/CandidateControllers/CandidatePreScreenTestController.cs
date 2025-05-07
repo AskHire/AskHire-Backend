@@ -1,16 +1,16 @@
-﻿using AskHire_Backend.Models.DTOs;
-using AskHire_Backend.Services;
+﻿using AskHire_Backend.Interfaces.Services.ICandidateServices;
+using AskHire_Backend.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AskHire_Backend.Controllers
+namespace AskHire_Backend.Controllers.CandidateControllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class PreScreenTestController : ControllerBase
+    public class CandidatePreScreenTestController : ControllerBase
     {
-        private readonly IPreScreenTestService _service;
+        private readonly ICandidatePreScreenTestService _service;
 
-        public PreScreenTestController(IPreScreenTestService service)
+        public CandidatePreScreenTestController(ICandidatePreScreenTestService service)
         {
             _service = service;
         }

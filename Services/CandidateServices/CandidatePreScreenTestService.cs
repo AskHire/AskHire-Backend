@@ -1,13 +1,14 @@
-﻿using AskHire_Backend.Data.Repositories;
+﻿using AskHire_Backend.Interfaces.Repositories.CandidateRepositories;
+using AskHire_Backend.Interfaces.Services.ICandidateServices;
 using AskHire_Backend.Models.DTOs;
 
-namespace AskHire_Backend.Services
+namespace AskHire_Backend.Services.CandidateServices
 {
-    public class PreScreenTestService : IPreScreenTestService
+    public class CandidatePreScreenTestService : ICandidatePreScreenTestService
     {
-        private readonly IPreScreenTestRepository _repository;
+        private readonly ICandidatePreScreenTestRepository _repository;
 
-        public PreScreenTestService(IPreScreenTestRepository repository)
+        public CandidatePreScreenTestService(ICandidatePreScreenTestRepository repository)
         {
             _repository = repository;
         }

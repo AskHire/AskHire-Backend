@@ -1,15 +1,15 @@
 ﻿using AskHire_Backend.Data.Entities;
+using AskHire_Backend.Interfaces.Repositories.CandidateRepositories;
 using AskHire_Backend.Models.Entities;
-using AskHire_Backend.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace AskHire_Backend.Repositories
+namespace AskHire_Backend.Data.Repositories.CandidateRepositories
 {
-    public class AnswerCheckRepository : IAnswerCheckRepository
+    public class CandidateAnswerCheckRepository : ICandidateAnswerCheckRepository
     {
         private readonly AppDbContext _context;
 
-        public AnswerCheckRepository(AppDbContext context)
+        public CandidateAnswerCheckRepository(AppDbContext context)
         {
             _context = context;
         }
