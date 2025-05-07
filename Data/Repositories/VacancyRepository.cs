@@ -63,23 +63,5 @@ namespace AskHire_Backend.Data.Repositories
         }
 
 
-        //eshan
-        public async Task<IEnumerable<JobWiseVacancyDto>> GetJobWiseVacanciesAsync()
-        {
-            return await _context.Vacancies
-                .Include(v => v.JobRole)
-                .Select(v => new JobWiseVacancyDto
-                {
-                    VacancyId = v.VacancyId,
-                    VacancyName = v.VacancyName,
-                    WorkType = v.JobRole != null ? v.JobRole.WorkType : "N/A",
-                    WorkLocation = v.JobRole != null ? v.JobRole.WorkLocation : "N/A",
-                    Description = v.JobRole != null ? v.JobRole.Description : "N/A",
-                    Instructions = v.Instructions,
-                    EndDate = v.EndDate
-                })
-                .ToListAsync();
-        }
-
     }
 }

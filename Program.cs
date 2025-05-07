@@ -4,6 +4,7 @@ using AskHire_Backend.Data.Repositories.CandidateRepositories;
 using AskHire_Backend.Data.Repositories.ManagerRepositories;
 using AskHire_Backend.Interfaces.Repositories;
 using AskHire_Backend.Interfaces.Repositories.CandidateRepositories;
+using AskHire_Backend.Interfaces.Repositories.IManagerRepositories;
 using AskHire_Backend.Interfaces.Repositories.ManagerRepositories;
 using AskHire_Backend.Interfaces.Services;
 using AskHire_Backend.Interfaces.Services.ICandidateServices;
@@ -11,6 +12,7 @@ using AskHire_Backend.Interfaces.Services.IManagerServices;
 using AskHire_Backend.Models.Entities;
 using AskHire_Backend.Repositories;
 using AskHire_Backend.Repositories.Interfaces;
+using AskHire_Backend.Repositories.ManagerRepositories;
 using AskHire_Backend.Services;
 using AskHire_Backend.Services.CandidateServices;
 using AskHire_Backend.Services.Interfaces;
@@ -125,7 +127,7 @@ builder.Services.AddScoped<IAdminDashboardRepository, AdminDashboardRepository>(
 builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
 
 builder.Services.AddScoped<IManagerCandidateRepository, ManagerCandidateRepository>();
-builder.Services.AddScoped<IManagerCandidateService, CandidateService>();
+builder.Services.AddScoped<IManagerCandidateService, ManagerCandidateService>();
 
 
 builder.Services.AddScoped<IManagerInterviewRepository, ManagerInterviewRepository>();
@@ -135,10 +137,23 @@ builder.Services.AddScoped<IManagerNotificationRepository, ManagerNotificationRe
 builder.Services.AddScoped<IManagerNotificationService, ManagerNotificationService>();
 
 
+builder.Services.AddScoped<IManagerLongListInterviewRepository, ManagerLongListInterviewRepository>();
+builder.Services.AddScoped<IManagerLongListInterviewService, ManagerLongListInterviewService>();
+
+builder.Services.AddScoped<IManagerEmailService, ManagerEmailService>();
+builder.Services.AddScoped<IManagerLonglistIVacancyRepository, ManagerLonglistVacancyRepository>();
+
 builder.Services.AddScoped<ICandidateFileRepository, CandidateFileRepository>();
 builder.Services.AddScoped<ICandidateFileService, CandidateFileService>();
 
-builder.Services.AddScoped<IManagerEmailService, ManagerEmailService>();
+
+builder.Services.AddScoped<ICandidateDashboardRepository, CandidateDashboardRepository>();
+builder.Services.AddScoped<ICandidateDashboardService, CandidateDashboardService>();
+
+
+builder.Services.AddScoped<ICandidateVacancyRepository, CandidateVacancyRepository>();
+builder.Services.AddScoped<ICandidateVacancyService, CandidateVacancyService>();
+
 
 
 var app = builder.Build();

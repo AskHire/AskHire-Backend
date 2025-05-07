@@ -14,7 +14,5 @@ namespace AskHire_Backend.Interfaces.Repositories
         Task<bool> DeleteVacancyAsync(Guid id);
         Task<Vacancy?> UpdateVacancyAsync(Vacancy vacancy);
 
-        //eshan
-        Task<IEnumerable<JobWiseVacancyDto>> GetJobWiseVacanciesAsync();
     }
 }
