@@ -1,15 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
-namespace fileupload.Interfaces
+public interface ICandidateFileService
 {
-    public interface ICandidateFileService
-    {
-        Task<List<BlobDto>> ListFilesAsync();
-        Task<BlobResponseDto> UploadFileAsync(IFormFile file, Guid userId, Guid vacancyId);
-        Task<BlobDto?> DownloadFileAsync(string filename);
-        Task<BlobResponseDto> DeleteFileAsync(string filename);
-        Task<BlobDto?> DownloadFileByApplicationIdAsync(Guid applicationId);
-        Task<BlobResponseDto> DeleteFileByApplicationIdAsync(Guid applicationId);
-
-    }
+    Task<IActionResult> UploadCvAsync(Guid userId, Guid vacancyId, IFormFile file);
+    Task<IActionResult> DownloadCvAsync(Guid applicationId);
+    Task<IActionResult> DeleteCvAsync(Guid applicationId);
+    Task<IActionResult> ViewUploadedCvsAsync();
 }

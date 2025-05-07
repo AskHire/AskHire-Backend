@@ -1,9 +1,9 @@
 ﻿using AskHire_Backend.Models.Entities;
 using AskHire_Backend.Data.Entities;
 
-namespace AskHire_Backend.Repositories.Interfaces
+namespace AskHire_Backend.Interfaces.Repositories.CandidateRepositories
 {
-    public interface IAnswerCheckRepository
+    public interface ICandidateAnswerCheckRepository
     {
         Task<Application?> GetApplicationWithVacancyAsync(Guid applicationId);
         Task<Question?> GetQuestionByIdAsync(Guid questionId);

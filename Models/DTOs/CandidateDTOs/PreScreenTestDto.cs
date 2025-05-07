@@ -1,4 +1,4 @@
-﻿using AskHire_Backend.Models.DTOs;
+﻿using AskHire_Backend.Models.DTOs.CandidateDTOs;
 
 public class PreScreenTestDto
 {

@@ -1,5 +1,5 @@
 using AskHire_Backend.Data.Entities;
-using AskHire_Backend.Models.DTOs;
+using AskHire_Backend.Models.DTOs.CandidateDTOs;
 using AskHire_Backend.Models.Entities;
 using System;
 using System.Collections.Generic;

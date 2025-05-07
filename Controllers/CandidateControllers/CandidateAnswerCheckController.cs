@@ -1,16 +1,16 @@
-﻿using AskHire_Backend.Models.DTOs;
-using AskHire_Backend.Services.Interfaces;
+﻿using AskHire_Backend.Interfaces.Services.ICandidateServices;
+using AskHire_Backend.Models.DTOs.CandidateDTOs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AskHire_Backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AnswerCheckController : ControllerBase
+    public class CandidateAnswerCheckController : ControllerBase
     {
-        private readonly IAnswerCheckService _service;
+        private readonly ICandidateAnswerCheckService _service;
 
-        public AnswerCheckController(IAnswerCheckService service)
+        public CandidateAnswerCheckController(ICandidateAnswerCheckService service)
         {
             _service = service;
         }

@@ -1,13 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
+﻿using AskHire_Backend.Models.Entities;
 
-namespace fileupload.Interfaces
+public interface ICandidateFileRepository
 {
-    public interface ICandidateFileRepository
-    {
-        Task<List<BlobDto>> ListAsync();
-        Task<BlobResponseDto> UploadAsync(IFormFile file);
-        Task<BlobDto?> DownloadAsync(string filename);
-        Task<BlobResponseDto> DeleteAsync(string filename);
-    }
+    Task<Application?> GetApplicationAsync(Guid applicationId);
+    Task<User?> GetUserAsync(Guid userId);
+    Task<Vacancy?> GetVacancyAsync(Guid vacancyId);
+    Task AddApplicationAsync(Application application);
+    Task SaveChangesAsync();
 }

@@ -1,14 +1,16 @@
 ﻿using AskHire_Backend.Data.Entities;
+using AskHire_Backend.Interfaces.Repositories.CandidateRepositories;
 using AskHire_Backend.Models.DTOs;
+using AskHire_Backend.Models.DTOs.CandidateDTOs;
 using Microsoft.EntityFrameworkCore;
 
-namespace AskHire_Backend.Data.Repositories
+namespace AskHire_Backend.Data.Repositories.CandidateRepositories
 {
-    public class PreScreenTestRepository : IPreScreenTestRepository
+    public class CandidatePreScreenTestRepository : ICandidatePreScreenTestRepository
     {
         private readonly AppDbContext _context;
 
-        public PreScreenTestRepository(AppDbContext context)
+        public CandidatePreScreenTestRepository(AppDbContext context)
         {
             _context = context;
         }
