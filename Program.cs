@@ -41,6 +41,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<CandidateFileService>();
+builder.Services.AddHttpClient();
+
 
 // DB Context
 builder.Services.AddDbContext<AppDbContext>(options =>
