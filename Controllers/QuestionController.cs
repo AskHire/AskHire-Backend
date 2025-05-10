@@ -2,11 +2,6 @@
 using AskHire_Backend.Models.Entities;
 using AskHire_Backend.Models.DTOs;
 using AskHire_Backend.Services;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
 namespace AskHire_Backend.Controllers
 {
     [Route("api/[controller]")]

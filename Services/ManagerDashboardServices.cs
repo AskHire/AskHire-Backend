@@ -23,5 +23,10 @@ namespace AskHire_Backend.Services
         {
             return await _managerDashboardRepository.GetTotalUsersAsync();
         }
+
+         public async Task<int> GetTotalInterviewsAsync()
+        {
+            return await _managerDashboardRepository.GetTotalInterviewsAsync();
+        }
     }
 }

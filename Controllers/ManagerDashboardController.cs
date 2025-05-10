@@ -49,5 +49,21 @@ namespace AskHire_Backend.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+
+
+        [HttpGet("total-interviews-today")]
+        public async Task<IActionResult> GetTotalInterviews()
+        {
+            try
+            {
+                var count = await _ManagerService.GetTotalInterviewsAsync();
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching total jobs count.");
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
     }
 }
