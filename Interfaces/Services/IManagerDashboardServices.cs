@@ -10,5 +10,6 @@ namespace AskHire_Backend.Interfaces.Services
         // Nullable return type
         Task<int> GetTotalJobsAsync();
         Task<int> GetTotalUsersAsync();
+        Task<int> GetTotalInterviewsAsync();
     }
 }
