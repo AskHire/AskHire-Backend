@@ -1,102 +1,255 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using AskHire_Backend.Models.Entities;
+using AskHire_Backend.Data.Entities;
+using AskHire_Backend.Models.DTOs.CandidateDTOs;
 
-namespace YourNamespace.Controllers
+namespace AskHire_Backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GeminiTallyController : ControllerBase
+    public class CvTallyController : ControllerBase
     {
-        private const string GEMINI_API_KEY = "AIzaSyBswdibdWpb_3sbz5d3HC1hfiBAIel18o0"; // Replace with your API Key
-        private const string GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyBswdibdWpb_3sbz5d3HC1hfiBAIel18o0";
+        private const string GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+        private readonly AppDbContext _context;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly string _geminiApiKey;
+        private static Dictionary<string, List<string>> _relatedDegreesCache = new();
 
-        [HttpPost("tally")]
-        public async Task<IActionResult> TallyCv([FromBody] CvRequest cvRequest)
+        public CvTallyController(AppDbContext context, IConfiguration configuration, IHttpClientFactory httpClientFactory)
         {
-            // Prepare the content based on education and experience
-            string educationCriteria = "Bachelor of Science in Information Technology";
-            string experienceCriteria = "Software Engineer with 3+ years of experience";
+            _context = context;
+            _httpClientFactory = httpClientFactory;
+            _geminiApiKey = configuration["GeminiApiKey"];
+        }
 
-            // Assuming you're checking this based on some logic
-            int educationScore = CheckEducation(cvRequest.CvText, educationCriteria);
-            int experienceScore = CheckExperience(cvRequest.CvText, experienceCriteria);
-
-            // Average the scores for the final tally
-            int totalScore = (educationScore + experienceScore) / 2;
-
-            // Send the CV to Gemini API for validation (if needed)
-            string geminiResponse = await SendToGeminiApi(cvRequest.CvText);
-
-            // Return the tally and Gemini response
-            return Ok(new
+        [HttpPost("analyze-application/{applicationId}")]
+        public async Task<IActionResult> AnalyzeApplication(Guid applicationId, [FromBody] CvUploadDto cvUpload)
+        {
+            try
             {
-                EducationScore = educationScore,
-                ExperienceScore = experienceScore,
-                TotalScore = totalScore,
-                GeminiResponse = geminiResponse
-            });
-        }
+                var application = await _context.Applies
+                    .Include(a => a.Vacancy)
+                    .FirstOrDefaultAsync(a => a.ApplicationId == applicationId);
 
-        // Function to check education match score
-        private int CheckEducation(string cvText, string educationCriteria)
-        {
-            // This logic is just an example. You can modify it based on your actual needs.
-            return cvText.Contains(educationCriteria) ? 100 : 0; // Example: 100 if matched, 0 if not
-        }
+                if (application == null)
+                    return NotFound($"Application with ID {applicationId} not found");
 
-        // Function to check experience match score
-        private int CheckExperience(string cvText, string experienceCriteria)
-        {
-            // Again, this is an example. Modify it as per your business logic.
-            return cvText.Contains(experienceCriteria) ? 100 : 0; // Example: 100 if matched, 0 if not
-        }
+                var vacancy = application.Vacancy;
+                if (vacancy == null)
+                    return BadRequest("Vacancy information not available for this application");
 
-        // Send CV to Gemini API
-        private async Task<string> SendToGeminiApi(string cvText)
-        {
-            using (HttpClient httpClient = new HttpClient())
-            {
-                // Construct the Gemini API request body
-                var jsonPayload = new
+                var requiredSkills = vacancy.RequiredSkills?.Split(',').Select(s => s.Trim()).ToList() ?? new();
+                var nonTechnicalSkills = vacancy.NonTechnicalSkills?.Split(',').Select(s => s.Trim()).ToList() ?? new();
+                var allRequiredSkills = requiredSkills.Concat(nonTechnicalSkills).ToList();
+
+                var analyzeRequest = new CvAnalysisRequest
                 {
-                    contents = new[]
-                    {
-                        new
-                        {
-                            parts = new[]
-                            {
-                                new { text = cvText }
-                            }
-                        }
-                    }
+                    CvText = cvUpload.CvText,
+                    JobTitle = vacancy.VacancyName,
+                    RequiredEducation = vacancy.Education,
+                    RelatedEducation = await GetRelatedDegrees(vacancy.Education),
+                    RequiredExperience = vacancy.Experience,
+                    RequiredSkills = allRequiredSkills
                 };
 
-                // Prepare the request
-                var content = new StringContent(System.Text.Json.JsonSerializer.Serialize(jsonPayload), Encoding.UTF8, "application/json");
-                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer AIzaSyBswdibdWpb_3sbz5d3HC1hfiBAIel18o0");
+                var analysisResult = await AnalyzeCvWithGemini(analyzeRequest, requiredSkills, nonTechnicalSkills);
 
-                // Send the request
-                HttpResponseMessage response = await httpClient.PostAsync(GEMINI_ENDPOINT + GEMINI_API_KEY, content);
+                application.CV_Mark = (int)Math.Round(analysisResult.OverallScore * 100);
 
-                if (response.IsSuccessStatusCode)
+                if (analysisResult.OverallScore >= vacancy.CVPassMark)
                 {
-                    // If successful, return the response as a string (you can further process it as needed)
-                    return await response.Content.ReadAsStringAsync();
+                    application.Status = "CV Approved";
+                    application.DashboardStatus = "Awaiting Pre-Screen";
                 }
                 else
                 {
-                    // Return an error message if the call fails
-                    return "Failed to contact Gemini API. Error: " + response.ReasonPhrase;
+                    application.Status = "CV Rejected";
+                    application.DashboardStatus = "Application Closed";
                 }
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new CvAnalysisResponseDto
+                {
+                    ApplicationId = application.ApplicationId,
+                    CvMark = application.CV_Mark,
+                    Status = application.Status,
+                    DashboardStatus = application.DashboardStatus,
+                    AnalysisDetails = analysisResult
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-    }
 
-    // Model for the incoming CV Request
-    public class CvRequest
-    {
-        public string CvText { get; set; }
+        private async Task<List<string>> GetRelatedDegrees(string primaryDegree)
+        {
+            string normalizedDegree = primaryDegree.ToLower().Trim();
+
+            if (_relatedDegreesCache.TryGetValue(normalizedDegree, out var cachedDegrees))
+                return cachedDegrees;
+
+            var httpClient = _httpClientFactory.CreateClient();
+
+            string prompt = $@"
+As an AI expert in academic qualifications and job requirements, identify all degrees that would be considered equivalent or related to the following primary degree requirement:
+Primary Degree: {primaryDegree}
+Please provide a list of at least 6-10 related degrees that would be considered acceptable alternatives in the job market.
+Return ONLY a JSON array of strings with no explanation or additional text. Format example: [""Degree 1"", ""Degree 2"", ""Degree 3""]";
+
+            var jsonPayload = new
+            {
+                contents = new[]
+                {
+                    new
+                    {
+                        parts = new[]
+                        {
+                            new { text = prompt }
+                        }
+                    }
+                }
+            };
+
+            var content = new StringContent(JsonSerializer.Serialize(jsonPayload), Encoding.UTF8, "application/json");
+
+            var response = await httpClient.PostAsync($"{GEMINI_ENDPOINT}?key={_geminiApiKey}", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string responseContent = await response.Content.ReadAsStringAsync();
+                var geminiResponse = JsonSerializer.Deserialize<GeminiResponse>(responseContent);
+
+                string relatedDegreesJson = geminiResponse?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
+
+                if (!string.IsNullOrEmpty(relatedDegreesJson))
+                {
+                    try
+                    {
+                        relatedDegreesJson = relatedDegreesJson.Replace("```json", "").Replace("```", "").Trim();
+                        var relatedDegrees = JsonSerializer.Deserialize<List<string>>(relatedDegreesJson);
+                        if (relatedDegrees != null && relatedDegrees.Any())
+                        {
+                            _relatedDegreesCache[normalizedDegree] = relatedDegrees;
+                            return relatedDegrees;
+                        }
+                    }
+                    catch (JsonException) { }
+                }
+            }
+
+            var defaultDegrees = new List<string> { "Information Technology", "Software Engineering", "Computer Science", "Information Systems" };
+            _relatedDegreesCache[normalizedDegree] = defaultDegrees;
+            return defaultDegrees;
+        }
+
+        private async Task<CvAnalysisResult> AnalyzeCvWithGemini(CvAnalysisRequest request, List<string> technicalSkills, List<string> nonTechnicalSkills)
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+
+            string prompt = $@"
+You are an AI talent evaluator specialized in analyzing resumes/CVs against job requirements.
+
+JOB DETAILS:
+- Job Title: {request.JobTitle}
+- Primary Education Requirement: {request.RequiredEducation}
+- Acceptable Related Education: {string.Join(", ", request.RelatedEducation)}
+- Experience Requirement: {request.RequiredExperience}
+- Additional Skills Required: {string.Join(", ", request.RequiredSkills)}
+
+CANDIDATE CV:
+{request.CvText}
+
+Please analyze this CV against the job requirements and provide the following in JSON format:
+{{
+  ""educationAnalysis"": {{
+    ""matchedDegrees"": [],
+    ""degreeRelevanceScore"": 0,
+    ""explanation"": ""...""
+  }},
+  ""experienceAnalysis"": {{
+    ""relevantExperienceYears"": 0,
+    ""experienceScore"": 0,
+    ""explanation"": ""...""
+  }},
+  ""skillsAnalysis"": {{
+    ""matchedSkills"": [],
+    ""missingSkills"": [],
+    ""skillsScore"": 0,
+    ""technicalSkillsScore"": 0,
+    ""nonTechnicalSkillsScore"": 0
+  }},
+  ""recommendation"": ""...""
+}}
+
+Return ONLY the JSON without any additional text or markdown.";
+
+            var jsonPayload = new
+            {
+                contents = new[]
+                {
+                    new
+                    {
+                        parts = new[]
+                        {
+                            new { text = prompt }
+                        }
+                    }
+                }
+            };
+
+            var content = new StringContent(JsonSerializer.Serialize(jsonPayload), Encoding.UTF8, "application/json");
+
+            var response = await httpClient.PostAsync($"{GEMINI_ENDPOINT}?key={_geminiApiKey}", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string responseContent = await response.Content.ReadAsStringAsync();
+                var geminiResponse = JsonSerializer.Deserialize<GeminiResponse>(responseContent);
+
+                string analysisJson = geminiResponse?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
+
+                if (!string.IsNullOrEmpty(analysisJson))
+                {
+                    try
+                    {
+                        analysisJson = analysisJson.Replace("```json", "").Replace("```", "").Trim();
+                        var analysisResult = JsonSerializer.Deserialize<CvAnalysisResult>(analysisJson);
+
+                        // Manual score calculation based on weights
+                        double overallScore =
+                              0.4 * (analysisResult.EducationAnalysis.DegreeRelevanceScore / 100.0)
+                            + 0.3 * (analysisResult.ExperienceAnalysis.ExperienceScore / 100.0)
+                            + 0.2 * (analysisResult.SkillsAnalysis.TechnicalSkillsScore / 100.0)
+                            + 0.1 * (analysisResult.SkillsAnalysis.NonTechnicalSkillsScore / 100.0);
+
+                        //analysisResult.OverallScore = overallScore;
+                        analysisResult.OverallScore = Math.Round(overallScore * 100, 2); 
+
+                        analysisResult.RelatedDegreesUsed = request.RelatedEducation;
+
+                        return analysisResult;
+                    }
+                    catch (JsonException ex)
+                    {
+                        throw new Exception("Failed to parse Gemini response: " + ex.Message);
+                    }
+                }
+            }
+
+            throw new Exception("Gemini API call failed or returned invalid response.");
+        }
     }
 }
