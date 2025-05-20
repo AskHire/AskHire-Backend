@@ -1,12 +1,12 @@
 ﻿using AskHire_Backend.Interfaces.Repositories;
+using AskHire_Backend.Interfaces.Repositories.AdminRepositories;
 using AskHire_Backend.Interfaces.Services;
 using AskHire_Backend.Models.Entities;
-using AskHire_Backend.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace AskHire_Backend.Services
+namespace AskHire_Backend.Services.AdminServices
 {
     public class AdminJobRoleService : IAdminJobRoleService
     {

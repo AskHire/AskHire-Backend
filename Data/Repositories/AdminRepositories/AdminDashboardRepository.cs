@@ -1,9 +1,10 @@
 ﻿using AskHire_Backend.Data;
 using AskHire_Backend.Data.Entities;
 using AskHire_Backend.Interfaces.Repositories;
+using AskHire_Backend.Interfaces.Repositories.AdminRepositories;
 using Microsoft.EntityFrameworkCore;
 
-namespace AskHire_Backend.Repositories
+namespace AskHire_Backend.Data.Repositories.AdminRepositories
 {
     public class AdminDashboardRepository : IAdminDashboardRepository
     {

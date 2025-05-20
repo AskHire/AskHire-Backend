@@ -1,8 +1,10 @@
 using AskHire_Backend.Data.Entities;
 using AskHire_Backend.Data.Repositories;
+using AskHire_Backend.Data.Repositories.AdminRepositories;
 using AskHire_Backend.Data.Repositories.CandidateRepositories;
 using AskHire_Backend.Data.Repositories.ManagerRepositories;
 using AskHire_Backend.Interfaces.Repositories;
+using AskHire_Backend.Interfaces.Repositories.AdminRepositories;
 using AskHire_Backend.Interfaces.Repositories.CandidateRepositories;
 using AskHire_Backend.Interfaces.Repositories.IManagerRepositories;
 using AskHire_Backend.Interfaces.Repositories.ManagerRepositories;
@@ -14,6 +16,7 @@ using AskHire_Backend.Repositories;
 using AskHire_Backend.Repositories.Interfaces;
 using AskHire_Backend.Repositories.ManagerRepositories;
 using AskHire_Backend.Services;
+using AskHire_Backend.Services.AdminServices;
 using AskHire_Backend.Services.CandidateServices;
 using AskHire_Backend.Services.Interfaces;
 using AskHire_Backend.Services.ManagerServices;

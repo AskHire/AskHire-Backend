@@ -3,7 +3,7 @@ using AskHire_Backend.Services;
 using Microsoft.AspNetCore.Mvc;
 
 
-namespace AskHire_Backend.Controllers
+namespace AskHire_Backend.Controllers.AdminControllers
 {
     [Route("api/adminjobrole")]
     [ApiController]
