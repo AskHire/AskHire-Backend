@@ -1,5 +1,4 @@
-﻿// Interfaces/Repositories/ICandidateRepository.cs
-using AskHire_Backend.Models.Entities;
+﻿using AskHire_Backend.Models.Entities;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

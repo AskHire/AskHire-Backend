@@ -37,8 +37,5 @@ namespace AskHire_Backend.Services
             if (jobRole == null) throw new ArgumentNullException(nameof(jobRole));
             return await _jobRoleRepository.UpdateJobRoleAsync(jobRole);
         }
-
-        // public async Task<int> GetTotalJobsAsync() =>
-        //     await _jobRoleRepository.GetTotalJobsAsync();
     }
 }
