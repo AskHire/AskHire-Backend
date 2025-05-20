@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace AskHire_Backend.Controllers
+namespace AskHire_Backend.Controllers.AdminControllers
 {
     [ApiController]
     [Route("api/[controller]")]

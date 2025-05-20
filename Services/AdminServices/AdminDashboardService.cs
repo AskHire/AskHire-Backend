@@ -1,8 +1,8 @@
 ﻿using AskHire_Backend.Interfaces.Repositories;
+using AskHire_Backend.Interfaces.Repositories.AdminRepositories;
 using AskHire_Backend.Models.DTOs;
-using AskHire_Backend.Repositories;
 
-namespace AskHire_Backend.Services
+namespace AskHire_Backend.Services.AdminServices
 {
     public class AdminDashboardService : IAdminDashboardService
     {

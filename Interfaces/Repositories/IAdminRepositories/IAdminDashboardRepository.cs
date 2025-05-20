@@ -1,4 +1,4 @@
-﻿namespace AskHire_Backend.Repositories
+﻿namespace AskHire_Backend.Interfaces.Repositories.AdminRepositories
 {
     public interface IAdminDashboardRepository
     {
