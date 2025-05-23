@@ -8,6 +8,7 @@ using AskHire_Backend.Interfaces.Services;
 namespace AskHire_Backend.Services
 {
     public class JobRoleService : IJobRoleService
+
     {
         private readonly IJobRoleRepository _jobRoleRepository;
 
@@ -37,7 +38,7 @@ namespace AskHire_Backend.Services
             return await _jobRoleRepository.UpdateJobRoleAsync(jobRole);
         }
 
-        public async Task<int> GetTotalJobsAsync() =>
-            await _jobRoleRepository.GetTotalJobsAsync();
+        // public async Task<int> GetTotalJobsAsync() =>
+        //     await _jobRoleRepository.GetTotalJobsAsync();
     }
 }

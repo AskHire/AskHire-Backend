@@ -1,3 +1,4 @@
+using AskHire_Backend.Interfaces.Services;
 using AskHire_Backend.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,16 +8,53 @@ namespace AskHire_Backend.Controllers
     [ApiController]
     public class JobRoleController : ControllerBase
     {
-        private readonly Interfaces.Services.IJobRoleService _jobRoleService;
+        private readonly IJobRoleService _jobRoleService;
         private readonly ILogger<JobRoleController> _logger;
 
-        public JobRoleController(Interfaces.Services.IJobRoleService jobRoleService, ILogger<JobRoleController> logger)
+        public JobRoleController(IJobRoleService jobRoleService, ILogger<JobRoleController> logger)
         {
             _jobRoleService = jobRoleService ?? throw new ArgumentNullException(nameof(jobRoleService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        // POST: api/jobrole
+        // GET: api/JobRole
+        [HttpGet]
+        public async Task<IActionResult> GetJobRoles()
+        {
+            try
+            {
+                var jobRoles = await _jobRoleService.GetAllJobRolesAsync();
+                return Ok(jobRoles);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving all job roles");
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        // GET: api/JobRole/{id}
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetJobRoleById(Guid id)
+        {
+            try
+            {
+                var jobRole = await _jobRoleService.GetJobRoleByIdAsync(id);
+                if (jobRole == null)
+                {
+                    _logger.LogWarning($"Job role with ID {id} not found");
+                    return NotFound(new { message = "Job role not found" });
+                }
+                return Ok(jobRole);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error retrieving job role with ID {id}");
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        // POST: api/JobRole
         [HttpPost]
         public async Task<ActionResult<JobRole>> CreateJobRole([FromBody] JobRole jobRole)
         {
@@ -39,58 +77,21 @@ namespace AskHire_Backend.Controllers
             }
         }
 
-        // GET: api/jobrole/{id}
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetJobRoleById(Guid id)
-        {
-            try
-            {
-                var jobRole = await _jobRoleService.GetJobRoleByIdAsync(id);
-                if (jobRole == null)
-                {
-                    _logger.LogWarning($"Job role with ID {id} not found");
-                    return NotFound(new { message = "Job role not found" });
-                }
-                return Ok(jobRole);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error retrieving job role with ID {id}");
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
 
-        // GET: api/jobrole
-        [HttpGet]
-        public async Task<IActionResult> GetAllJobRoles()
-        {
-            try
-            {
-                var jobRoles = await _jobRoleService.GetAllJobRolesAsync();
-                return Ok(jobRoles);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving all job roles");
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
-
-
-        [HttpGet("total-jobs")]
-        public async Task<IActionResult> GetTotalJobs()
-        {
-            try
-            {
-                var count = await _jobRoleService.GetTotalJobsAsync();
-                return Ok(count);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error fetching total jobs count.");
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
+        // [HttpGet("total-jobs")]
+        // public async Task<IActionResult> GetTotalJobs()
+        // {
+        //     try
+        //     {
+        //         var count = await _jobRoleService.GetTotalJobsAsync();
+        //         return Ok(count);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         _logger.LogError(ex, "Error fetching total jobs count.");
+        //         return StatusCode(500, new { message = ex.Message });
+        //     }
+        // }
 
 
         // PUT: api/jobrole/{id}
@@ -127,7 +128,7 @@ namespace AskHire_Backend.Controllers
             }
         }
 
-        // DELETE: api/jobrole/{id}
+        // DELETE: api/JobRole/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteJobRole(Guid id)
         {

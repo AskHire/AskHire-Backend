@@ -1,6 +1,6 @@
 ﻿namespace AskHire_Backend.Models.DTOs
 {
-    public class JobWiseVacancyDto
+    public class CandidateVacancyDto
     {
         public Guid VacancyId { get; set; }
         public string VacancyName { get; set; }

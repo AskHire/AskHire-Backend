@@ -1,4 +1,4 @@
-﻿using AskHire_Backend.Models.DTOs;
+using AskHire_Backend.Models.DTOs;
 
 namespace AskHire_Backend.Services.Interfaces
 {
