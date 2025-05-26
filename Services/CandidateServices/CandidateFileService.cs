@@ -1,102 +1,126 @@
-﻿using fileupload.Interfaces;
-using AskHire_Backend.Data.Entities;
-using AskHire_Backend.Models.Entities;
+﻿using AskHire_Backend.Models.Entities;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using System.Net.Mime;
+using System.Text;
+using UglyToad.PdfPig;
 
-namespace fileupload.Services
+
+public class CandidateFileService : ICandidateFileService
 {
-    public class CandidateFileService : ICandidateFileService
+    private readonly ICandidateFileRepository _repository;
+    private readonly BlobContainerClient _blobContainer;
+
+    public CandidateFileService(ICandidateFileRepository repository, IConfiguration config)
     {
-        private readonly ICandidateFileRepository _fileRepo;
-        private readonly AppDbContext _context;
+        _repository = repository;
 
-        public CandidateFileService(ICandidateFileRepository fileRepo, AppDbContext context)
+        string connectionString = config["AzureBlobStorage:ConnectionString"]!;
+        string containerName = config["AzureBlobStorage:ContainerName"]!;
+        _blobContainer = new BlobContainerClient(connectionString, containerName);
+        _blobContainer.CreateIfNotExists();
+    }
+
+public async Task<IActionResult> UploadCvAsync(Guid userId, Guid vacancyId, IFormFile file)
+{
+    if (file == null || file.Length == 0)
+        return new BadRequestObjectResult("Invalid file.");
+
+    var user = await _repository.GetUserAsync(userId);
+    var vacancy = await _repository.GetVacancyAsync(vacancyId);
+    if (user == null || vacancy == null)
+        return new BadRequestObjectResult("Invalid user or vacancy ID.");
+
+    var applicationId = Guid.NewGuid();
+    var blobName = $"{applicationId}/{file.FileName}";
+    var blobClient = _blobContainer.GetBlobClient(blobName);
+
+    // Upload the file to Azure Blob Storage
+    using var stream = file.OpenReadStream();
+    await blobClient.UploadAsync(stream, overwrite: true);
+
+    // Extract text from the uploaded PDF using PdfPig
+    string extractedText = string.Empty;
+    if (file.ContentType == "application/pdf")
+    {
+        using (var pdfDocument = PdfDocument.Open(file.OpenReadStream()))
         {
-            _fileRepo = fileRepo;
-            _context = context;
-        }
-
-        public async Task<List<BlobDto>> ListFilesAsync()
-        {
-            return await _fileRepo.ListAsync();
-        }
-
-        public async Task<BlobResponseDto> UploadFileAsync(IFormFile file, Guid userId, Guid vacancyId)
-        {
-            var uploadResult = await _fileRepo.UploadAsync(file);
-
-            var user = await _context.Users.FindAsync(userId);
-            var vacancy = await _context.Vacancies.FindAsync(vacancyId);
-
-            if (user == null || vacancy == null)
+            var textBuilder = new StringBuilder();
+            foreach (var page in pdfDocument.GetPages())
             {
-                throw new ArgumentException("Invalid UserId or VacancyId");
+                textBuilder.AppendLine(page.Text);
             }
+            extractedText = textBuilder.ToString();
+        }
+    }
 
-            var application = new Application
+    // Return the extracted text as part of the response
+    return new OkObjectResult(new
+    {
+        ApplicationId = applicationId,
+        Message = "CV uploaded and text extracted successfully.",
+        ExtractedCvText = extractedText // Return the extracted text in the response
+    });
+}
+
+
+public async Task<IActionResult> DownloadCvAsync(Guid applicationId)
+    {
+        var application = await _repository.GetApplicationAsync(applicationId);
+        if (application == null || string.IsNullOrEmpty(application.CVFilePath))
+            return new NotFoundObjectResult("CV not found.");
+
+        var blobUrl = new Uri(application.CVFilePath);
+        var blobName = blobUrl.AbsolutePath.TrimStart('/').Replace($"{_blobContainer.Name}/", "");
+        var blob = _blobContainer.GetBlobClient(blobName);
+
+        if (!await blob.ExistsAsync())
+            return new NotFoundObjectResult("Blob does not exist.");
+
+        var downloadInfo = await blob.DownloadAsync();
+        return new FileStreamResult(downloadInfo.Value.Content, MediaTypeNames.Application.Octet)
+        {
+            FileDownloadName = Path.GetFileName(blobName)
+        };
+    }
+
+    public async Task<IActionResult> DeleteCvAsync(Guid applicationId)
+    {
+        var application = await _repository.GetApplicationAsync(applicationId);
+        if (application == null || string.IsNullOrEmpty(application.CVFilePath))
+            return new NotFoundObjectResult("CV not found.");
+
+        var blobUrl = new Uri(application.CVFilePath);
+        var blobName = blobUrl.AbsolutePath.TrimStart('/').Replace($"{_blobContainer.Name}/", "");
+        var blob = _blobContainer.GetBlobClient(blobName);
+
+        await blob.DeleteIfExistsAsync();
+
+        application.CVFilePath = null!;
+        await _repository.SaveChangesAsync();
+
+        return new OkObjectResult("CV deleted successfully.");
+    }
+
+    public async Task<IActionResult> ViewUploadedCvsAsync()
+    {
+        var result = new List<object>();
+
+        await foreach (BlobItem blobItem in _blobContainer.GetBlobsAsync())
+        {
+            result.Add(new
             {
-                ApplicationId = Guid.NewGuid(),
-                UserId = userId,
-                VacancyId = vacancyId,
-                User = user,
-                Vacancy = vacancy,
-                CVFilePath = uploadResult.Blob.Uri ?? string.Empty,
-                CV_Mark = 0,
-                Pre_Screen_PassMark = 0,
-                Status = "Pending",
-                DashboardStatus = "Applied"
-            };
-
-            _context.Applies.Add(application);
-            await _context.SaveChangesAsync();
-
-            return uploadResult;
+                Name = blobItem.Name,
+                Url = $"{_blobContainer.Uri}/{blobItem.Name}",
+                Size = blobItem.Properties.ContentLength,
+                ContentType = blobItem.Properties.ContentType,
+                LastModified = blobItem.Properties.LastModified?.UtcDateTime
+            });
         }
 
-
-        public async Task<BlobDto?> DownloadFileAsync(string filename)
-        {
-            return await _fileRepo.DownloadAsync(filename);
-        }
-
-        public async Task<BlobResponseDto> DeleteFileAsync(string filename)
-        {
-            return await _fileRepo.DeleteAsync(filename);
-        }
-
-        public async Task<BlobDto?> DownloadFileByApplicationIdAsync(Guid applicationId)
-        {
-            var application = await _context.Applies.FindAsync(applicationId);
-            if (application == null || string.IsNullOrEmpty(application.CVFilePath))
-                throw new ArgumentException("Invalid application ID or no file path found.");
-
-            var filename = Path.GetFileName(new Uri(application.CVFilePath).LocalPath);
-            return await _fileRepo.DownloadAsync(filename);
-        }
-
-        public async Task<BlobResponseDto> DeleteFileByApplicationIdAsync(Guid applicationId)
-        {
-            var application = await _context.Applies.FindAsync(applicationId);
-            if (application == null)
-                throw new ArgumentException("Invalid application ID.");
-
-            if (string.IsNullOrEmpty(application.CVFilePath))
-                throw new InvalidOperationException("No file associated with this application.");
-
-            var filename = Path.GetFileName(new Uri(application.CVFilePath).LocalPath);
-
-            // Delete from Azure Blob
-            var deleteResult = await _fileRepo.DeleteAsync(filename);
-
-            // Update DB - Clear file path
-            application.CVFilePath = null;
-            _context.Applies.Update(application); // Optional, EF Core tracks by default
-            await _context.SaveChangesAsync();    // Ensure this is awaited
-
-            return deleteResult;
-        }
-
-
+        return new OkObjectResult(result);
     }
 }

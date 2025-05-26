@@ -8,6 +8,7 @@ namespace AskHire_Backend.Repositories.Interfaces
         
         Task<int> GetTotalUsersAsync();
         Task<int> GetTotalJobsAsync();
+        Task<int> GetTotalInterviewsAsync();
 
     
     }

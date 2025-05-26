@@ -1,5 +1,4 @@
-﻿// Repositories/CandidateRepository.cs
-using AskHire_Backend.Data;
+﻿using AskHire_Backend.Data;
 using AskHire_Backend.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
