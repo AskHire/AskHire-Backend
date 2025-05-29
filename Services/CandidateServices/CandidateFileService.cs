@@ -24,50 +24,71 @@ public class CandidateFileService : ICandidateFileService
         _blobContainer.CreateIfNotExists();
     }
 
-public async Task<IActionResult> UploadCvAsync(Guid userId, Guid vacancyId, IFormFile file)
-{
-    if (file == null || file.Length == 0)
-        return new BadRequestObjectResult("Invalid file.");
-
-    var user = await _repository.GetUserAsync(userId);
-    var vacancy = await _repository.GetVacancyAsync(vacancyId);
-    if (user == null || vacancy == null)
-        return new BadRequestObjectResult("Invalid user or vacancy ID.");
-
-    var applicationId = Guid.NewGuid();
-    var blobName = $"{applicationId}/{file.FileName}";
-    var blobClient = _blobContainer.GetBlobClient(blobName);
-
-    // Upload the file to Azure Blob Storage
-    using var stream = file.OpenReadStream();
-    await blobClient.UploadAsync(stream, overwrite: true);
-
-    // Extract text from the uploaded PDF using PdfPig
-    string extractedText = string.Empty;
-    if (file.ContentType == "application/pdf")
+    public async Task<IActionResult> UploadCvAsync(Guid userId, Guid vacancyId, IFormFile file)
     {
-        using (var pdfDocument = PdfDocument.Open(file.OpenReadStream()))
+        if (file == null || file.Length == 0)
+            return new BadRequestObjectResult("Invalid file.");
+
+        var user = await _repository.GetUserAsync(userId);
+        var vacancy = await _repository.GetVacancyAsync(vacancyId);
+        if (user == null || vacancy == null)
+            return new BadRequestObjectResult("Invalid user or vacancy ID.");
+
+        var applicationId = Guid.NewGuid();
+        var blobName = $"{applicationId}/{file.FileName}";
+        var blobClient = _blobContainer.GetBlobClient(blobName);
+
+        // Upload the file to Azure Blob Storage
+        using (var stream = file.OpenReadStream())
         {
+            await blobClient.UploadAsync(stream, overwrite: true);
+        }
+
+        // Extract text from the uploaded PDF using PdfPig
+        string extractedText = string.Empty;
+        if (file.ContentType == "application/pdf")
+        {
+            using var pdfStream = file.OpenReadStream();
+            using var pdfDocument = PdfDocument.Open(pdfStream);
             var textBuilder = new StringBuilder();
+
             foreach (var page in pdfDocument.GetPages())
             {
                 textBuilder.AppendLine(page.Text);
             }
+
             extractedText = textBuilder.ToString();
         }
+
+        // Create Application record
+        var application = new Application
+        {
+            ApplicationId = applicationId,
+            UserId = userId,
+            User = user,
+            VacancyId = vacancyId,
+            Vacancy = vacancy,
+            CVFilePath = blobClient.Uri.ToString(),
+            CV_Mark = 0,
+            Pre_Screen_PassMark = 0,
+            Status = "Pending",
+            DashboardStatus = "Awaiting Review"
+        };
+
+        await _repository.AddApplicationAsync(application);
+        await _repository.SaveChangesAsync();
+
+        return new OkObjectResult(new
+        {
+            ApplicationId = applicationId,
+            Message = "CV uploaded and application saved successfully.",
+            ExtractedCvText = extractedText,
+            BlobUrl = blobClient.Uri.ToString()
+        });
     }
 
-    // Return the extracted text as part of the response
-    return new OkObjectResult(new
-    {
-        ApplicationId = applicationId,
-        Message = "CV uploaded and text extracted successfully.",
-        ExtractedCvText = extractedText // Return the extracted text in the response
-    });
-}
 
-
-public async Task<IActionResult> DownloadCvAsync(Guid applicationId)
+    public async Task<IActionResult> DownloadCvAsync(Guid applicationId)
     {
         var application = await _repository.GetApplicationAsync(applicationId);
         if (application == null || string.IsNullOrEmpty(application.CVFilePath))
