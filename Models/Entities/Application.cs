@@ -13,7 +13,7 @@ namespace AskHire_Backend.Models.Entities
         public string? CVFilePath { get; set; }  // Nullable
         public required int Pre_Screen_PassMark { get; set; }
         public required string Status { get; set; }
-        public string DashboardStatus { get; set; }
+        public string? DashboardStatus { get; set; }
 
 
         [ForeignKey("User")]

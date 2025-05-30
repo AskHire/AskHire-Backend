@@ -13,5 +13,6 @@ namespace AskHire_Backend.Models.Entities
         public required DateTime Time { get; set; }
         public required string Type { get; set; }
         public required string Subject { get; set; }
-    }
+
+        public string? Status { get; set; }    }
 }
