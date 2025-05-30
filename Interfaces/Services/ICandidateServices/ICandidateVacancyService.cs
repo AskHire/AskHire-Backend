@@ -10,5 +10,8 @@ namespace AskHire_Backend.Services
         Task<IEnumerable<CandidateVacancyDto>> GetMostAppliedVacanciesAsync();
         Task<IEnumerable<CandidateVacancyDto>> GetLatestVacanciesAsync();
 
+        Task<CandidateJobShowDto?> GetVacancyByIdAsync(Guid vacancyId);
+
+
     }
 }

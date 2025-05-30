@@ -39,5 +39,17 @@ namespace AskHire_Backend.Controllers
             return Ok(vacancies);
         }
 
+        [HttpGet("{vacancyId}")]
+        public async Task<ActionResult<CandidateJobShowDto>> GetVacancyById(Guid vacancyId)
+        {
+            var vacancy = await _candidateVacancyService.GetVacancyByIdAsync(vacancyId);
+            if (vacancy == null)
+            {
+                return NotFound();
+            }
+            return Ok(vacancy);
+        }
+
+
     }
 }

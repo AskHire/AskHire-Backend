@@ -78,5 +78,28 @@ namespace AskHire_Backend.Repositories
                 .ToListAsync();
         }
 
+        public async Task<CandidateJobShowDto?> GetVacancyByIdAsync(Guid vacancyId)
+        {
+            return await _context.Vacancies
+                .Where(v => v.VacancyId == vacancyId)
+                .Include(v => v.JobRole)
+                .Select(v => new CandidateJobShowDto
+                {
+                    VacancyName = v.VacancyName,
+                    Instructions = v.Instructions,
+                    Experience = v.Experience,
+                    Education = v.Education,
+                    NonTechnicalSkills = v.NonTechnicalSkills,
+                    StartDate = v.StartDate,
+                    RequiredSkills = v.RequiredSkills,
+                    EndDate = v.EndDate,
+                    Description = v.JobRole != null ? v.JobRole.Description : "N/A",
+                    WorkType = v.JobRole != null ? v.JobRole.WorkType : "N/A",
+                    WorkLocation = v.JobRole != null ? v.JobRole.WorkLocation : "N/A"
+                })
+                .FirstOrDefaultAsync();
+        }
+
+
     }
 }
