@@ -8,4 +8,5 @@ public interface ICandidateFileRepository
     Task AddApplicationAsync(Application application);
     Task SaveChangesAsync();
     Task<Application?> GetApplicationWithVacancyAsync(Guid applicationId);
+    Task<int?> GetCVMarkByApplicationIdAsync(Guid applicationId);
 }
