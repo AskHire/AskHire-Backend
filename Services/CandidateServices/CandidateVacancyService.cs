@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AskHire_Backend.Models.DTOs;
+using AskHire_Backend.Models.DTOs.CandidateDTOs;
 using AskHire_Backend.Repositories;
 
 namespace AskHire_Backend.Services
@@ -14,9 +15,9 @@ namespace AskHire_Backend.Services
             _candidateVacancyRepository = candidateVacancyRepository;
         }
 
-        public async Task<IEnumerable<CandidateVacancyDto>> GetJobWiseVacanciesAsync()
+        public async Task<CandidateJobPagedResultDto<CandidateVacancyDto>> GetJobWiseVacanciesAsync(int pageNumber, int pageSize, string search, string sortOrder)
         {
-            return await _candidateVacancyRepository.GetJobWiseVacanciesAsync();
+            return await _candidateVacancyRepository.GetJobWiseVacanciesAsync(pageNumber, pageSize, search, sortOrder);
         }
 
         public async Task<IEnumerable<CandidateVacancyDto>> GetMostAppliedVacanciesAsync()
