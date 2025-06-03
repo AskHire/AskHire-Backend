@@ -181,6 +181,66 @@ public class CandidateFileService : ICandidateFileService
         _geminiHelper = new GeminiHelper(httpClientFactory, geminiApiKey);
     }
 
+    //public async Task<IActionResult> UploadCvAsync(Guid userId, Guid vacancyId, IFormFile file)
+    //{
+    //    if (file == null || file.Length == 0)
+    //        return new BadRequestObjectResult("Invalid file.");
+
+    //    var user = await _repository.GetUserAsync(userId);
+    //    var vacancy = await _repository.GetVacancyAsync(vacancyId);
+    //    if (user == null || vacancy == null)
+    //        return new BadRequestObjectResult("Invalid user or vacancy ID.");
+
+    //    var applicationId = Guid.NewGuid();
+    //    var blobName = $"{applicationId}/{file.FileName}";
+    //    var blobClient = _blobContainer.GetBlobClient(blobName);
+
+    //    using (var stream = file.OpenReadStream())
+    //    {
+    //        await blobClient.UploadAsync(stream, overwrite: true);
+    //    }
+
+    //    string extractedText = string.Empty;
+    //    if (file.ContentType == "application/pdf")
+    //    {
+    //        using var pdfStream = file.OpenReadStream();
+    //        using var pdfDocument = PdfDocument.Open(pdfStream);
+    //        var textBuilder = new StringBuilder();
+
+    //        foreach (var page in pdfDocument.GetPages())
+    //        {
+    //            textBuilder.AppendLine(page.Text);
+    //        }
+
+    //        extractedText = textBuilder.ToString();
+    //    }
+
+    //    var application = new Application
+    //    {
+    //        ApplicationId = applicationId,
+    //        UserId = userId,
+    //        User = user,
+    //        VacancyId = vacancyId,
+    //        Vacancy = vacancy,
+    //        CVFilePath = blobClient.Uri.ToString(),
+    //        CV_Mark = 0,
+    //        Pre_Screen_PassMark = 0,
+    //        Status = "Pending",
+    //        DashboardStatus = "Awaiting Review"
+    //    };
+
+    //    await _repository.AddApplicationAsync(application);
+    //    await _repository.SaveChangesAsync();
+
+    //    return new OkObjectResult(new
+    //    {
+    //        ApplicationId = applicationId,
+    //        Message = "CV uploaded and application saved successfully.",
+    //        ExtractedCvText = extractedText,
+    //        BlobUrl = blobClient.Uri.ToString()
+    //    });
+    //}
+
     public async Task<IActionResult> UploadCvAsync(Guid userId, Guid vacancyId, IFormFile file)
     {
         if (file == null || file.Length == 0)
@@ -232,14 +292,29 @@ public class CandidateFileService : ICandidateFileService
         await _repository.AddApplicationAsync(application);
         await _repository.SaveChangesAsync();
 
+        // 🧠 Call the AnalyzeApplicationAsync function here
+        var analysisResult = await AnalyzeApplicationAsync(applicationId);
+        if (analysisResult is ObjectResult result)
+        {
+            return new OkObjectResult(new
+            {
+                ApplicationId = applicationId,
+                Message = "CV uploaded, application saved, and analysis completed successfully.",
+                ExtractedCvText = extractedText,
+                BlobUrl = blobClient.Uri.ToString(),
+                AnalysisResult = result.Value
+            });
+        }
+
         return new OkObjectResult(new
         {
             ApplicationId = applicationId,
-            Message = "CV uploaded and application saved successfully.",
+            Message = "CV uploaded and application saved, but analysis did not return data.",
             ExtractedCvText = extractedText,
             BlobUrl = blobClient.Uri.ToString()
         });
     }
+
 
     public async Task<IActionResult> DownloadCvAsync(Guid applicationId)
     {
