@@ -32,6 +32,14 @@ public class CandidateFileRepository : ICandidateFileRepository
             .FirstOrDefaultAsync(a => a.ApplicationId == applicationId);
     }
 
+    public async Task<int?> GetCVMarkByApplicationIdAsync(Guid applicationId)
+    {
+        return await _context.Applies
+            .Where(a => a.ApplicationId == applicationId)
+            .Select(a => (int?)a.CV_Mark)
+            .FirstOrDefaultAsync();
+    }
+
 
     public Task SaveChangesAsync() =>
         _context.SaveChangesAsync();

@@ -374,5 +374,9 @@ public class CandidateFileService : ICandidateFileService
             AnalysisDetails = analysisResult
         });
     }
+    public async Task<int?> GetCVMarkAsync(Guid applicationId)
+    {
+        return await _repository.GetCVMarkByApplicationIdAsync(applicationId);
+    }
 }
 

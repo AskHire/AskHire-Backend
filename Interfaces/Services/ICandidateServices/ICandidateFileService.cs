@@ -20,4 +20,5 @@ public interface ICandidateFileService
     Task<IActionResult> DeleteCvAsync(Guid applicationId);
     Task<IActionResult> ViewUploadedCvsAsync();
     Task<IActionResult> AnalyzeApplicationAsync(Guid applicationId);
+    Task<int?> GetCVMarkAsync(Guid applicationId);
 }
