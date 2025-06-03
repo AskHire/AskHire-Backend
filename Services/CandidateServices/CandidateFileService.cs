@@ -225,7 +225,7 @@ public class CandidateFileService : ICandidateFileService
             CV_Mark = 0,
             Pre_Screen_PassMark = 0,
             Status = "Pending",
-            DashboardStatus = "Awaiting Review"
+            DashboardStatus = "Applied"
         };
 
         await _repository.AddApplicationAsync(application);
