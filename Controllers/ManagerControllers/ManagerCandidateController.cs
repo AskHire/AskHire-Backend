@@ -1,4 +1,4 @@
-﻿// Controllers/CandidatesController.cs
+﻿// Controllers/ManagerCandidatesController.cs
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -14,15 +14,31 @@ namespace AskHire_Backend.Controllers.Manager
     public class ManagerCandidatesController : ControllerBase
     {
         private readonly IManagerCandidateService _candidateService;
+        private readonly ICandidateFileService _fileService;
 
-        public ManagerCandidatesController(IManagerCandidateService candidateService)
+        public ManagerCandidatesController(IManagerCandidateService candidateService, ICandidateFileService fileService)
         {
             _candidateService = candidateService;
+            _fileService = fileService;
         }
 
+        // GET: api/ManagerCandidates - Get all LongList candidates
+        [HttpGet]
+        public async Task<IActionResult> GetAllLongListCandidates()
+        {
+            try
+            {
+                // Get all applications with LongList status
+                var allApplications = await _candidateService.GetApplicationsByStatusAsync("LongList");
+                return Ok(allApplications);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while processing your request: {ex.Message}");
+            }
+        }
 
-
-        // GET: api/Candidates/{id}
+        // GET: api/ManagerCandidates/{id}
         [HttpGet("{applicationId}")]
         public async Task<ActionResult<object>> GetApplicationById(Guid applicationId)
         {
@@ -43,7 +59,6 @@ namespace AskHire_Backend.Controllers.Manager
             }
         }
 
-
         [HttpGet("vacancies")]
         public async Task<IActionResult> GetVacancies()
         {
@@ -57,7 +72,6 @@ namespace AskHire_Backend.Controllers.Manager
                 return StatusCode(500, "An error occurred while processing your request.");
             }
         }
-
 
         [HttpGet("vacancy/{vacancyName}")]
         public async Task<IActionResult> GetCandidatesByVacancy(string vacancyName)
@@ -74,10 +88,14 @@ namespace AskHire_Backend.Controllers.Manager
                         string status = null;
 
                         // Try to access status property (case-insensitive)
-                        if (candidate.GetType().GetProperty("status") != null)
-                            status = candidate.status?.ToString()?.ToLower();
-                        else if (candidate.GetType().GetProperty("Status") != null)
-                            status = candidate.Status?.ToString()?.ToLower();
+                        var candidateType = candidate.GetType();
+                        var statusProperty = candidateType.GetProperty("status") ?? candidateType.GetProperty("Status");
+
+                        if (statusProperty != null)
+                        {
+                            var statusValue = statusProperty.GetValue(candidate);
+                            status = statusValue?.ToString()?.ToLower();
+                        }
 
                         return status == "longlist";
                     }
@@ -105,77 +123,22 @@ namespace AskHire_Backend.Controllers.Manager
             }
         }
 
-
         [HttpGet("download-cv/{applicationId}")]
         public async Task<IActionResult> DownloadCV(Guid applicationId)
         {
             try
             {
-                // Check if the application ID is valid
-                if (applicationId == Guid.Empty)
-                {
-                    return BadRequest("Invalid application ID");
-                }
-
-                var fileBytes = await _candidateService.GetCVFileAsync(applicationId);
-
-                // Check if the file bytes are null or empty
-                if (fileBytes == null || fileBytes.Length == 0)
-                {
-                    return NotFound($"CV file for application ID {applicationId} is empty or not found");
-                }
-
-                var fileName = await _candidateService.GetCVFileNameAsync(applicationId);
-
-                // Check if the filename is valid
-                if (string.IsNullOrWhiteSpace(fileName))
-                {
-                    fileName = $"CV_{applicationId}.pdf";
-                }
-
-                var contentType = "application/pdf";
-
-                // Try to determine content type from file extension if not pdf
-                if (!fileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
-                {
-                    var extension = Path.GetExtension(fileName).ToLowerInvariant();
-                    switch (extension)
-                    {
-                        case ".docx":
-                            contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-                            break;
-                        case ".doc":
-                            contentType = "application/msword";
-                            break;
-                            // Add more content types as needed
-                    }
-                }
-
-                return File(fileBytes, contentType, fileName);
-            }
-            catch (FileNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
+                // Use the file service to download CV
+                return await _fileService.DownloadCvAsync(applicationId);
             }
             catch (Exception ex)
             {
-                // Log the specific exception details
-                // If you have a logger, uncomment and use the following line:
-                // _logger.LogError(ex, "Error downloading CV for application ID: {ApplicationId}", applicationId);
-
+                // Log the exception details here if you have a logger
                 return StatusCode(500, $"An error occurred while downloading the CV: {ex.Message}");
             }
         }
 
-        // GET: api/Candidates/status/{status}
+        // GET: api/ManagerCandidates/status/{status}
         [HttpGet("status/{status}")]
         public async Task<IActionResult> GetCandidatesByStatus(string status)
         {
@@ -194,7 +157,7 @@ namespace AskHire_Backend.Controllers.Manager
             }
         }
 
-        // GET: api/Candidates/statistics
+        // GET: api/ManagerCandidates/statistics
         [HttpGet("statistics")]
         public async Task<IActionResult> GetCandidateStatistics()
         {
@@ -209,7 +172,7 @@ namespace AskHire_Backend.Controllers.Manager
             }
         }
 
-        // GET: api/Candidates/statistics/vacancy/{vacancyId}
+        // GET: api/ManagerCandidates/statistics/vacancy/{vacancyId}
         [HttpGet("statistics/vacancy/{vacancyId}")]
         public async Task<IActionResult> GetCandidateStatisticsByVacancy(Guid vacancyId)
         {
