@@ -44,3 +44,4 @@ namespace AskHire_Backend.Data.Repositories.AdminRepositories
         }
     }
 }
+

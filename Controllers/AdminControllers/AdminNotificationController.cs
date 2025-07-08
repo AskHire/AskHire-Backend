@@ -36,4 +36,14 @@ public class AdminNotificationsController : ControllerBase
         var created = await _service.CreateAsync(notification);
         return CreatedAtAction(nameof(GetById), new { id = created.NotificationId }, created);
     }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var notification = await _service.GetByIdAsync(id);
+        if (notification == null) return NotFound();
+        var deleted = await _service.DeleteAsync(id);
+        if (!deleted) return BadRequest("Failed to delete notification.");
+        return NoContent();
+    }
 }
