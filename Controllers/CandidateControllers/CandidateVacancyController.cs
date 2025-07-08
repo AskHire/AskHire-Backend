@@ -1,4 +1,5 @@
 ﻿using AskHire_Backend.Models.DTOs;
+using AskHire_Backend.Models.DTOs.CandidateDTOs;
 using AskHire_Backend.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -18,12 +19,21 @@ namespace AskHire_Backend.Controllers
         }
 
         // GET: api/CandidateVacancy/JobWiseVacancies
+
         [HttpGet("JobWiseVacancies")]
-        public async Task<ActionResult<IEnumerable<CandidateVacancyDto>>> GetJobWiseVacancies()
+        public async Task<ActionResult<CandidateJobPagedResultDto<CandidateVacancyDto>>> GetJobWiseVacancies(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] string search = "",
+            [FromQuery] string sortOrder = "none") // 👈 add sortOrder
         {
-            var vacancies = await _candidateVacancyService.GetJobWiseVacanciesAsync();
-            return Ok(vacancies);
+            const int pageSize = 9;
+            var result = await _candidateVacancyService.GetJobWiseVacanciesAsync(pageNumber, pageSize, search, sortOrder);
+            return Ok(result);
         }
+
+
+
+
 
         [HttpGet("MostApplied")]
         public async Task<ActionResult<IEnumerable<CandidateVacancyDto>>> GetMostAppliedVacancies()
@@ -38,6 +48,18 @@ namespace AskHire_Backend.Controllers
             var vacancies = await _candidateVacancyService.GetLatestVacanciesAsync();
             return Ok(vacancies);
         }
+
+        [HttpGet("{vacancyId}")]
+        public async Task<ActionResult<CandidateJobShowDto>> GetVacancyById(Guid vacancyId)
+        {
+            var vacancy = await _candidateVacancyService.GetVacancyByIdAsync(vacancyId);
+            if (vacancy == null)
+            {
+                return NotFound();
+            }
+            return Ok(vacancy);
+        }
+
 
     }
 }

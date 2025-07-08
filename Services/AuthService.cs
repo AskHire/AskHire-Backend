@@ -55,7 +55,8 @@ namespace AskHire_Backend.Services
                 NIC = request.NIC,
                 MobileNumber = request.MobileNumber,
                 Address = request.Address,
-                Role = "Candidate" // Default role
+                Role = "Candidate", // Default role
+                SignUpDate = DateTime.UtcNow
             };
 
             var result = await _userManager.CreateAsync(user, request.Password);

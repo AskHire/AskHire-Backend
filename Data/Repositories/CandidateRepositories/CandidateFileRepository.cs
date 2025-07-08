@@ -25,6 +25,22 @@ public class CandidateFileRepository : ICandidateFileRepository
         await _context.Applies.AddAsync(application);
     }
 
+    public async Task<Application?> GetApplicationWithVacancyAsync(Guid applicationId)
+    {
+        return await _context.Applies
+            .Include(a => a.Vacancy)
+            .FirstOrDefaultAsync(a => a.ApplicationId == applicationId);
+    }
+
+    public async Task<int?> GetCVMarkByApplicationIdAsync(Guid applicationId)
+    {
+        return await _context.Applies
+            .Where(a => a.ApplicationId == applicationId)
+            .Select(a => (int?)a.CV_Mark)
+            .FirstOrDefaultAsync();
+    }
+
+
     public Task SaveChangesAsync() =>
         _context.SaveChangesAsync();
 }
