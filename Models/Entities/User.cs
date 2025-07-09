@@ -18,6 +18,8 @@ namespace AskHire_Backend.Models.Entities
         public string? NIC { get; set; } = string.Empty;
         public string? MobileNumber { get; set; } = string.Empty;
         public string? Address { get; set; } = string.Empty;
+
+        public virtual ICollection<Application> Applications { get; set; } = new List<Application>();
     }
 }
 
