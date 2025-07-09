@@ -13,8 +13,5 @@ namespace AskHire_Backend.Models.Entities
         public required string Description { get; set; }
         public required string WorkType { get; set; }
         public required string WorkLocation { get; set; }
-
-        public virtual ICollection<Vacancy> Vacancies { get; set; } = new List<Vacancy>();
-        public virtual ICollection<Question> Questions { get; set; } = new List<Question>();
     }
 }

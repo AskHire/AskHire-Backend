@@ -30,6 +30,5 @@ namespace AskHire_Backend.Models.Entities
         public Guid? JobId { get; set; }
         public JobRole? JobRole { get; set; }
 
-        public virtual ICollection<Application> Applies { get; set; } = new List<Application>();
     }
 }
