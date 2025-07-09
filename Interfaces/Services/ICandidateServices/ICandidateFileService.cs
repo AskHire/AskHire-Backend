@@ -8,10 +8,11 @@
 //    Task<IActionResult> DeleteCvAsync(Guid applicationId);
 //    Task<IActionResult> ViewUploadedCvsAsync();
 //}
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
+using AskHire_Backend.Models.DTOs.CandidateDTOs;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 public interface ICandidateFileService
 {
@@ -20,5 +21,6 @@ public interface ICandidateFileService
     Task<IActionResult> DeleteCvAsync(Guid applicationId);
     Task<IActionResult> ViewUploadedCvsAsync();
     Task<IActionResult> AnalyzeApplicationAsync(Guid applicationId);
-    Task<int?> GetCVMarkAsync(Guid applicationId);
+    //Task<int?> GetCVMarkAsync(Guid applicationId);
+    Task<ApplicationCVStatusDto?> GetCVMarkAndStatusAsync(Guid applicationId);
 }

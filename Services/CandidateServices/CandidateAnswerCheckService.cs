@@ -66,7 +66,7 @@ namespace AskHire_Backend.Services.CandidateServices
 
             double percentage = correctAnswersCount * 100.0 / request.QuestionCount;
             application.Pre_Screen_PassMark = (int)percentage;
-            application.Status = application.Pre_Screen_PassMark >= application.Vacancy.PreScreenPassMark ? "longlist" : "Rejected";
+            application.Status = application.Pre_Screen_PassMark >= application.Vacancy.PreScreenPassMark ? "Longlist" : "Rejected";
             application.DashboardStatus = "Pre-Screening";
             await _repository.SaveChangesAsync();
 
