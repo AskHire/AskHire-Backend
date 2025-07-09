@@ -24,7 +24,6 @@ namespace AskHire_Backend.Models.Entities
         public Guid VacancyId { get; set; }
         public required Vacancy Vacancy { get; set; }
 
-        public virtual Interview? Interview { get; set; }
     }
 
 

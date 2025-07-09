@@ -19,35 +19,6 @@ namespace AskHire_Backend.Data.Entities
 
         public DbSet<Reminder> Reminder { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<User>()
-                .HasMany(u => u.Applications)
-                .WithOne(a => a.User)
-                .HasForeignKey(a => a.UserId);
-
-            modelBuilder.Entity<JobRole>()
-                .HasMany(j => j.Vacancies)
-                .WithOne(v => v.JobRole)
-                .HasForeignKey(v => v.JobId);
-
-            modelBuilder.Entity<JobRole>()
-                .HasMany(j => j.Questions)
-                .WithOne(q => q.JobRole)
-                .HasForeignKey(q => q.JobId);
-
-            modelBuilder.Entity<Vacancy>()
-                .HasMany(v => v.Applies)
-                .WithOne(a => a.Vacancy)
-                .HasForeignKey(a => a.VacancyId);
-
-            modelBuilder.Entity<Application>()
-                .HasOne(a => a.Interview)
-                .WithOne(i => i.Application)
-                .HasForeignKey<Interview>(i => i.ApplicationId);
-        }
     }
 }
 
