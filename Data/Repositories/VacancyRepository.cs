@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AskHire_Backend.Data.Entities;
-using AskHire_Backend.Models.DTOs;
+
 
 namespace AskHire_Backend.Data.Repositories
 {
