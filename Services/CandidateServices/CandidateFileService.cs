@@ -633,9 +633,15 @@ public class CandidateFileService : ICandidateFileService
 
         return null;
     }
-    public async Task<int?> GetCVMarkAsync(Guid applicationId)
+    //public async Task<int?> GetCVMarkAsync(Guid applicationId)
+    //{
+    //    return await _repository.GetCVMarkByApplicationIdAsync(applicationId);
+    //}
+
+    public Task<ApplicationCVStatusDto?> GetCVMarkAndStatusAsync(Guid applicationId)
     {
-        return await _repository.GetCVMarkByApplicationIdAsync(applicationId);
+        return _repository.GetCVMarkAndStatusAsync(applicationId);
     }
+
 }
 

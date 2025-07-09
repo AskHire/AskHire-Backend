@@ -6,4 +6,5 @@ public class PreScreenTestDto
     public string VacancyName { get; set; } = string.Empty;
     public int Duration { get; set; }
     public int QuestionCount { get; set; }
+    public string? Status { get; set; }
 }
