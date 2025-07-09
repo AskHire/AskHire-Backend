@@ -1,7 +1,9 @@
-﻿using AskHire_Backend.Data.Entities;
+﻿using AskHire_Backend.Data;
+using AskHire_Backend.Data.Entities;
 using AskHire_Backend.Models.DTOs;
 using AskHire_Backend.Models.DTOs.CandidateDTOs;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,7 +19,9 @@ namespace AskHire_Backend.Repositories
             _context = context;
         }
 
-        public async Task<CandidateJobPagedResultDto<CandidateVacancyDto>> GetJobWiseVacanciesAsync(int pageNumber, int pageSize, string search, string sortOrder)
+        // <<< SOLUTION 2: FULLY IMPLEMENTED METHOD >>>
+        public async Task<CandidateJobPagedResultDto<CandidateVacancyDto>> GetJobWiseVacanciesAsync(
+            int pageNumber, int pageSize, string search, string sortOrder, bool isDemanded, bool isLatest)
         {
             var query = _context.Vacancies
                 .Include(v => v.JobRole)
@@ -36,14 +40,26 @@ namespace AskHire_Backend.Repositories
                 );
             }
 
-            // ✅ Apply sorting
-            sortOrder = sortOrder?.ToLower();
-            query = sortOrder switch
+            if (isLatest)
             {
-                "a-z" => query.OrderBy(v => v.VacancyName),
-                "z-a" => query.OrderByDescending(v => v.VacancyName),
-                _ => query.OrderBy(v => v.VacancyName) // Default order
-            };
+                query = query.OrderByDescending(v => v.StartDate);
+            }
+            // This is the corrected logic that replaces the faulty join
+            else if (isDemanded)
+            {
+                // This works because of the ICollection<Application> on the Vacancy entity
+                query = query.OrderByDescending(v => v.Applies.Count());
+            }
+            else
+            {
+                sortOrder = sortOrder?.ToLower();
+                query = sortOrder switch
+                {
+                    "a-z" => query.OrderBy(v => v.VacancyName),
+                    "z-a" => query.OrderByDescending(v => v.VacancyName),
+                    _ => query.OrderByDescending(v => v.StartDate) // Default sort
+                };
+            }
 
             var totalCount = await query.CountAsync();
             var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
@@ -73,10 +89,7 @@ namespace AskHire_Backend.Repositories
             };
         }
 
-
-
-
-
+        // --- Other methods in the repository remain unchanged ---
 
         public async Task<IEnumerable<CandidateVacancyDto>> GetMostAppliedVacanciesAsync()
         {
@@ -102,7 +115,6 @@ namespace AskHire_Backend.Repositories
                 })
                 .ToListAsync();
         }
-
 
         public async Task<IEnumerable<CandidateVacancyDto>> GetLatestVacanciesAsync()
         {
@@ -144,7 +156,5 @@ namespace AskHire_Backend.Repositories
                 })
                 .FirstOrDefaultAsync();
         }
-
-
     }
 }
