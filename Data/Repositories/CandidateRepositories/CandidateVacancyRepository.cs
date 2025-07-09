@@ -48,7 +48,7 @@ namespace AskHire_Backend.Repositories
             else if (isDemanded)
             {
                 // This works because of the ICollection<Application> on the Vacancy entity
-                query = query.OrderByDescending(v => v.Applies.Count());
+                //query = query.OrderByDescending(v => v.Applies.Count());
             }
             else
             {
