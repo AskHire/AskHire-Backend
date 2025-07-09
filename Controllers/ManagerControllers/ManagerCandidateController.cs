@@ -71,7 +71,7 @@ namespace AskHire_Backend.Controllers.Manager
                 Func<dynamic, bool> isLongList = candidate => {
                     try
                     {
-                        string status = null;
+                        string? status = null;
 
                         // Try to access status property (case-insensitive)
                         if (candidate.GetType().GetProperty("status") != null)

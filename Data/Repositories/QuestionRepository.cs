@@ -3,10 +3,7 @@ using AskHire_Backend.Models.DTOs;
 using AskHire_Backend.Data.Entities;
 using AskHire_Backend.Repositories;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace AskHire_Backend.Repositories
 {
