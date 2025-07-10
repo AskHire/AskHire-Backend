@@ -199,8 +199,7 @@ using (var scope = app.Services.CreateScope())
 
 // Development tools
 if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
+{    app.UseSwagger();
     app.UseSwaggerUI();
 }
 
