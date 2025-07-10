@@ -20,7 +20,7 @@ namespace AskHire_Backend.Controllers.AdminControllers
 
         // GET: api/AdminUser
         [HttpGet]
-       
+
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _userManager.Users.ToListAsync();
@@ -29,7 +29,7 @@ namespace AskHire_Backend.Controllers.AdminControllers
 
         // PUT: api/AdminUser/UpdateRole
         [HttpPut("UpdateRole")]
-        
+
         public async Task<IActionResult> UpdateUserRole([FromBody] UpdateRoleDto request)
         {
             var user = await _userManager.FindByIdAsync(request.UserId.ToString());
@@ -46,7 +46,7 @@ namespace AskHire_Backend.Controllers.AdminControllers
         }
 
 
-        [Authorize(Roles = "Admin")] // Only Admins can delete users
+        
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {

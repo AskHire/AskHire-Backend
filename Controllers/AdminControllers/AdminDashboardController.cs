@@ -23,7 +23,7 @@ namespace AskHire_Backend.Controllers.AdminControllers
             var totalUsers = await _context.Users.CountAsync();
             var totalCandidates = await _context.Users.CountAsync(u => u.Role == "Candidate");
             var totalManagers = await _context.Users.CountAsync(u => u.Role == "Manager");
-            var totalJobs = await _context.JobRoles.CountAsync(); 
+            var totalJobs = await _context.JobRoles.CountAsync();
 
             return Ok(new
             {

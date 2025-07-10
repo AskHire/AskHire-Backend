@@ -1,3 +1,4 @@
+using AskHire_Backend.Data;
 using AskHire_Backend.Data.Entities;
 using AskHire_Backend.Data.Repositories;
 using AskHire_Backend.Data.Repositories.AdminRepositories;
@@ -28,7 +29,9 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ==============================
 // CORS for frontend
+// ==============================
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
@@ -39,25 +42,32 @@ builder.Services.AddCors(options =>
             .AllowCredentials());
 });
 
+// ==============================
 // Swagger
+// ==============================
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<CandidateFileService>();
 builder.Services.AddHttpClient();
 
-
-// DB Context
+// ==============================
+// Database Context
+// ==============================
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DatabaseString"))
            .LogTo(Console.WriteLine));
 
+// ==============================
 // Identity
+// ==============================
 builder.Services.AddIdentity<User, IdentityRole<Guid>>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
-// JWT Auth
+// ==============================
+// JWT Authentication
+// ==============================
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -89,21 +99,45 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
+// ==============================
 // Dependency Injection
+// ==============================
+
+// Common
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 
+// Admin
+builder.Services.AddScoped<IAdminJobRoleRepository, AdminJobRoleRepository>();
+builder.Services.AddScoped<IAdminJobRoleService, AdminJobRoleService>();
 
-// ✅ Register Repositories & Services
-builder.Services.AddScoped<IVacancyRepository, VacancyRepository>();
-builder.Services.AddScoped<IVacancyService, VacancyService>();
+builder.Services.AddScoped<IAdminNotificationRepository, AdminNotificationRepository>();
+builder.Services.AddScoped<IAdminNotificationService, AdminNotificationService>();
 
-builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
-builder.Services.AddScoped<IQuestionService, QuestionService>();
+builder.Services.AddScoped<IAdminDashboardRepository, AdminDashboardRepository>();
+builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
 
-builder.Services.AddScoped<IJobRoleRepository, JobRoleRepository>();
-builder.Services.AddScoped<IJobRoleService, JobRoleService>();
+// Manager
+builder.Services.AddScoped<IManagerInterviewRepository, ManagerInterviewRepository>();
+builder.Services.AddScoped<IManagerInterviewService, ManagerInterviewService>();
 
+builder.Services.AddScoped<IManagerEmailService, ManagerEmailService>();
+builder.Services.AddScoped<IManagerNotificationRepository, ManagerNotificationRepository>();
+builder.Services.AddScoped<IManagerNotificationService, ManagerNotificationService>();
+builder.Services.AddScoped<IManagerDashboardRepository, ManagerDashboardRepository>();
+builder.Services.AddScoped<IManagerDashboardService, ManagerDashboardService>();
+builder.Services.AddScoped<IManagerCandidateRepository, ManagerCandidateRepository>();
+builder.Services.AddScoped<IManagerCandidateService, ManagerCandidateService>();
+builder.Services.AddScoped<IManagerLongListInterviewRepository, ManagerLongListInterviewRepository>();
+builder.Services.AddScoped<IManagerLongListInterviewService, ManagerLongListInterviewService>();
+builder.Services.AddScoped<IManagerLonglistIVacancyRepository, ManagerLonglistVacancyRepository>();
+
+// Candidate
+builder.Services.AddScoped<ICandidateVacancyRepository, CandidateVacancyRepository>();
+builder.Services.AddScoped<ICandidateVacancyService, CandidateVacancyService>();
+
+builder.Services.AddScoped<ICandidateDashboardRepository, CandidateDashboardRepository>();
+builder.Services.AddScoped<ICandidateDashboardService, CandidateDashboardService>();
 
 builder.Services.AddScoped<ICandidateInterviewRepository, CandidateInterviewRepository>();
 builder.Services.AddScoped<ICandidateInterviewService, CandidateInterviewService>();
@@ -114,57 +148,39 @@ builder.Services.AddScoped<ICandidatePreScreenTestService, CandidatePreScreenTes
 builder.Services.AddScoped<ICandidateAnswerCheckRepository, CandidateAnswerCheckRepository>();
 builder.Services.AddScoped<ICandidateAnswerCheckService, CandidateAnswerCheckService>();
 
-
-builder.Services.AddScoped<IReminderRepository, ReminderRepository>();
-builder.Services.AddScoped<IReminderService, ReminderService>();
-
-builder.Services.AddScoped<IAdminJobRoleRepository, AdminJobRoleRepository>();
-builder.Services.AddScoped<IAdminJobRoleService, AdminJobRoleService>();
-
-builder.Services.AddScoped<IAdminNotificationRepository, AdminNotificationRepository>();
-builder.Services.AddScoped<IAdminNotificationService, AdminNotificationService>();
-
-
-builder.Services.AddScoped<IManagerDashboardRepository, ManagerDashboardRepository>();
-builder.Services.AddScoped<IManagerDashboardService, ManagerDashboardService>();
-
-builder.Services.AddScoped<IAdminDashboardRepository, AdminDashboardRepository>();
-builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
-
-builder.Services.AddScoped<IManagerCandidateRepository, ManagerCandidateRepository>();
-builder.Services.AddScoped<IManagerCandidateService, ManagerCandidateService>();
-
-
-builder.Services.AddScoped<IManagerInterviewRepository, ManagerInterviewRepository>();
-builder.Services.AddScoped<IManagerInterviewService, ManagerInterviewService>();
-
-builder.Services.AddScoped<IManagerNotificationRepository, ManagerNotificationRepository>();
-builder.Services.AddScoped<IManagerNotificationService, ManagerNotificationService>();
-
-
-builder.Services.AddScoped<IManagerLongListInterviewRepository, ManagerLongListInterviewRepository>();
-builder.Services.AddScoped<IManagerLongListInterviewService, ManagerLongListInterviewService>();
-
-builder.Services.AddScoped<IManagerEmailService, ManagerEmailService>();
-builder.Services.AddScoped<IManagerLonglistIVacancyRepository, ManagerLonglistVacancyRepository>();
-
 builder.Services.AddScoped<ICandidateFileRepository, CandidateFileRepository>();
 builder.Services.AddScoped<ICandidateFileService, CandidateFileService>();
 
+// Vacancy & Questions
+builder.Services.AddScoped<IVacancyRepository, VacancyRepository>();
+builder.Services.AddScoped<IVacancyService, VacancyService>();
 
-builder.Services.AddScoped<ICandidateDashboardRepository, CandidateDashboardRepository>();
-builder.Services.AddScoped<ICandidateDashboardService, CandidateDashboardService>();
+builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+builder.Services.AddScoped<IQuestionService, QuestionService>();
+
+builder.Services.AddScoped<IJobRoleRepository, JobRoleRepository>();
+builder.Services.AddScoped<IJobRoleService, JobRoleService>();
+
+// ✅ Reminder Service Integration
+builder.Services.AddScoped<IReminderRepository, ReminderRepository>();
+builder.Services.AddScoped<IReminderService, ReminderService>();
+
+builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
+builder.Services.AddScoped<IProfileService, ProfileService>();
+
+builder.Services.AddScoped<IApplicationRepository, ApplicationRepository>();
+builder.Services.AddScoped<IApplicationService, ApplicationService>();
 
 
-builder.Services.AddScoped<ICandidateVacancyRepository, CandidateVacancyRepository>();
-builder.Services.AddScoped<ICandidateVacancyService, CandidateVacancyService>();
-
-
-
+// ==============================
+// App Pipeline
+// ==============================
 var app = builder.Build();
 
-// CORS
+// Enable CORS
 app.UseCors("AllowFrontend");
+
+app.UseStaticFiles();
 
 // Seed roles
 using (var scope = app.Services.CreateScope())
@@ -181,14 +197,14 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Pipeline
+// Development tools
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-//app.UseHttpsRedirection();
+// Middleware
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
