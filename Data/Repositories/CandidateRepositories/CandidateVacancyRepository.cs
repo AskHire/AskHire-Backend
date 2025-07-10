@@ -19,13 +19,13 @@ namespace AskHire_Backend.Repositories
             _context = context;
         }
 
-        // <<< SOLUTION 2: FULLY IMPLEMENTED METHOD >>>
         public async Task<CandidateJobPagedResultDto<CandidateVacancyDto>> GetJobWiseVacanciesAsync(
             int pageNumber, int pageSize, string search, string sortOrder, bool isDemanded, bool isLatest)
         {
             var query = _context.Vacancies
                 .Include(v => v.JobRole)
-                .AsQueryable();
+                .AsQueryable()
+                .Where(v => v.EndDate >= DateTime.UtcNow); // <<< MODIFIED: Filter out expired vacancies
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -44,11 +44,9 @@ namespace AskHire_Backend.Repositories
             {
                 query = query.OrderByDescending(v => v.StartDate);
             }
-            // This is the corrected logic that replaces the faulty join
             else if (isDemanded)
             {
-                // This works because of the ICollection<Application> on the Vacancy entity
-                //query = query.OrderByDescending(v => v.Applies.Count());
+                query = query.OrderByDescending(v => v.Applies.Count());
             }
             else
             {
@@ -89,11 +87,10 @@ namespace AskHire_Backend.Repositories
             };
         }
 
-        // --- Other methods in the repository remain unchanged ---
-
         public async Task<IEnumerable<CandidateVacancyDto>> GetMostAppliedVacanciesAsync()
         {
             var topVacancyIds = await _context.Applies
+                .Where(a => a.Vacancy.EndDate >= DateTime.UtcNow) // <<< MODIFIED: Consider only active vacancies
                 .GroupBy(a => a.VacancyId)
                 .OrderByDescending(g => g.Count())
                 .Take(6)
@@ -119,6 +116,7 @@ namespace AskHire_Backend.Repositories
         public async Task<IEnumerable<CandidateVacancyDto>> GetLatestVacanciesAsync()
         {
             return await _context.Vacancies
+                .Where(v => v.EndDate >= DateTime.UtcNow) // <<< MODIFIED: Filter out expired vacancies
                 .OrderByDescending(v => v.StartDate)
                 .Take(6)
                 .Include(v => v.JobRole)
@@ -138,7 +136,7 @@ namespace AskHire_Backend.Repositories
         public async Task<CandidateJobShowDto?> GetVacancyByIdAsync(Guid vacancyId)
         {
             return await _context.Vacancies
-                .Where(v => v.VacancyId == vacancyId)
+                .Where(v => v.VacancyId == vacancyId && v.EndDate >= DateTime.UtcNow) // <<< MODIFIED: Ensure the selected vacancy is not expired
                 .Include(v => v.JobRole)
                 .Select(v => new CandidateJobShowDto
                 {
