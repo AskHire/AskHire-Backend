@@ -1,5 +1,6 @@
 ﻿using AskHire_Backend.Data.Entities;
 using AskHire_Backend.Interfaces.Repositories.CandidateRepositories;
+using AskHire_Backend.Models.DTOs.CandidateDTOs;
 using AskHire_Backend.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,5 +32,22 @@ namespace AskHire_Backend.Data.Repositories.CandidateRepositories
         {
             await _context.SaveChangesAsync();
         }
+
+        public async Task<PreScreenPassMarkDto> GetPreScreenPassMarkAndEmailAsync(Guid applicationId)
+        {
+            var application = await _context.Applies
+                .Include(a => a.User)
+                .FirstOrDefaultAsync(a => a.ApplicationId == applicationId);
+
+            if (application == null)
+                throw new Exception("Application not found");
+
+            return new PreScreenPassMarkDto
+            {
+                Email = application.User.Email,
+                PreScreenPassMark = application.Pre_Screen_PassMark
+            };
+        }
+
     }
 }

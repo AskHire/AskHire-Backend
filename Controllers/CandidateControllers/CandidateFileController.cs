@@ -88,6 +88,17 @@ public class CandidateFileController : ControllerBase
     //    return Ok(cvMark);
     //}
 
+    //[HttpGet("{applicationId}/cv-status")]
+    //public async Task<IActionResult> GetCVMarkAndStatus(Guid applicationId)
+    //{
+    //    var result = await _service.GetCVMarkAndStatusAsync(applicationId);
+
+    //    if (result == null)
+    //        return NotFound("Application not found");
+
+    //    return Ok(result);
+    //}
+
     [HttpGet("{applicationId}/cv-status")]
     public async Task<IActionResult> GetCVMarkAndStatus(Guid applicationId)
     {
@@ -96,6 +107,32 @@ public class CandidateFileController : ControllerBase
         if (result == null)
             return NotFound("Application not found");
 
+        // Send CV mark email here (using minimal data from another DTO)
+        var cvData = await _service.GetCVMarkAndEmailAsync(applicationId);
+
+        if (cvData != null && !string.IsNullOrEmpty(cvData.UserEmail))
+        {
+            await _service.SendCVMarkEmailAsync(cvData.UserEmail, cvData.CV_Mark);
+        }
+
         return Ok(result);
     }
+
+
+    //[HttpPost("{applicationId}/send-cv-mark-email")]
+    //public async Task<IActionResult> SendCVMarkEmail(Guid applicationId)
+    //{
+    //    var cvData = await _service.GetCVMarkAndEmailAsync(applicationId);
+
+    //    if (cvData == null || string.IsNullOrEmpty(cvData.UserEmail))
+    //        return NotFound("Candidate not found or email missing.");
+
+    //    bool result = await _service.SendCVMarkEmailAsync(cvData.UserEmail, cvData.CV_Mark);
+
+    //    if (result)
+    //        return Ok("CV mark email sent successfully.");
+    //    else
+    //        return StatusCode(500, "Failed to send email.");
+    //}
+
 }

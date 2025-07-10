@@ -148,6 +148,8 @@
 
 using System;
 using System.IO;
+using System.Net;
+using System.Net.Mail;
 using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
@@ -641,6 +643,41 @@ public class CandidateFileService : ICandidateFileService
     public Task<ApplicationCVStatusDto?> GetCVMarkAndStatusAsync(Guid applicationId)
     {
         return _repository.GetCVMarkAndStatusAsync(applicationId);
+    }
+    public Task<ApplicationCVMarkDto?> GetCVMarkAndEmailAsync(Guid applicationId)
+    {
+        return _repository.GetCVMarkAndEmailAsync(applicationId);
+    }
+
+    public async Task<bool> SendCVMarkEmailAsync(string recipientEmail, int? cvMark)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(recipientEmail)) return false;
+
+            var message = new MailMessage
+            {
+                From = new MailAddress("your-email@example.com", "AskHire Team"),
+                Subject = "Your CV Review Result",
+                Body = $"Dear Candidate,\n\nYour CV has been reviewed.\nYour CV Score is: {cvMark}/100.\n\nThank you for applying.\n\nBest regards,\nAskHire Team",
+                IsBodyHtml = false
+            };
+
+            message.To.Add(recipientEmail);
+
+            using var smtp = new SmtpClient("smtp.gmail.com", 587)
+            {
+                Credentials = new NetworkCredential("dimashiwickramage2002@gmail.com", "fnxm msjt blvm vnmo"),
+                EnableSsl = true
+            };
+
+            await smtp.SendMailAsync(message);
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
     }
 
 }
