@@ -1,7 +1,9 @@
-﻿using AskHire_Backend.Data.Entities;
+﻿using AskHire_Backend.Data;
+using AskHire_Backend.Data.Entities;
 using AskHire_Backend.Models.DTOs;
 using AskHire_Backend.Models.DTOs.CandidateDTOs;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,11 +19,13 @@ namespace AskHire_Backend.Repositories
             _context = context;
         }
 
-        public async Task<CandidateJobPagedResultDto<CandidateVacancyDto>> GetJobWiseVacanciesAsync(int pageNumber, int pageSize, string search, string sortOrder)
+        public async Task<CandidateJobPagedResultDto<CandidateVacancyDto>> GetJobWiseVacanciesAsync(
+            int pageNumber, int pageSize, string search, string sortOrder, bool isDemanded, bool isLatest)
         {
             var query = _context.Vacancies
                 .Include(v => v.JobRole)
-                .AsQueryable();
+                .AsQueryable()
+                .Where(v => v.EndDate >= DateTime.UtcNow); // <<< MODIFIED: Filter out expired vacancies
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -36,14 +40,24 @@ namespace AskHire_Backend.Repositories
                 );
             }
 
-            // ✅ Apply sorting
-            sortOrder = sortOrder?.ToLower();
-            query = sortOrder switch
+            if (isLatest)
             {
-                "a-z" => query.OrderBy(v => v.VacancyName),
-                "z-a" => query.OrderByDescending(v => v.VacancyName),
-                _ => query.OrderBy(v => v.VacancyName) // Default order
-            };
+                query = query.OrderByDescending(v => v.StartDate);
+            }
+            else if (isDemanded)
+            {
+                query = query.OrderByDescending(v => v.Applies.Count());
+            }
+            else
+            {
+                sortOrder = sortOrder?.ToLower();
+                query = sortOrder switch
+                {
+                    "a-z" => query.OrderBy(v => v.VacancyName),
+                    "z-a" => query.OrderByDescending(v => v.VacancyName),
+                    _ => query.OrderByDescending(v => v.StartDate) // Default sort
+                };
+            }
 
             var totalCount = await query.CountAsync();
             var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
@@ -73,14 +87,10 @@ namespace AskHire_Backend.Repositories
             };
         }
 
-
-
-
-
-
         public async Task<IEnumerable<CandidateVacancyDto>> GetMostAppliedVacanciesAsync()
         {
             var topVacancyIds = await _context.Applies
+                .Where(a => a.Vacancy.EndDate >= DateTime.UtcNow) // <<< MODIFIED: Consider only active vacancies
                 .GroupBy(a => a.VacancyId)
                 .OrderByDescending(g => g.Count())
                 .Take(6)
@@ -103,10 +113,10 @@ namespace AskHire_Backend.Repositories
                 .ToListAsync();
         }
 
-
         public async Task<IEnumerable<CandidateVacancyDto>> GetLatestVacanciesAsync()
         {
             return await _context.Vacancies
+                .Where(v => v.EndDate >= DateTime.UtcNow) // <<< MODIFIED: Filter out expired vacancies
                 .OrderByDescending(v => v.StartDate)
                 .Take(6)
                 .Include(v => v.JobRole)
@@ -126,7 +136,7 @@ namespace AskHire_Backend.Repositories
         public async Task<CandidateJobShowDto?> GetVacancyByIdAsync(Guid vacancyId)
         {
             return await _context.Vacancies
-                .Where(v => v.VacancyId == vacancyId)
+                .Where(v => v.VacancyId == vacancyId && v.EndDate >= DateTime.UtcNow) // <<< MODIFIED: Ensure the selected vacancy is not expired
                 .Include(v => v.JobRole)
                 .Select(v => new CandidateJobShowDto
                 {
@@ -144,7 +154,5 @@ namespace AskHire_Backend.Repositories
                 })
                 .FirstOrDefaultAsync();
         }
-
-
     }
 }

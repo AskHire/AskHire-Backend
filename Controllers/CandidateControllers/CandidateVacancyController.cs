@@ -2,6 +2,7 @@
 using AskHire_Backend.Models.DTOs.CandidateDTOs;
 using AskHire_Backend.Services;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -19,21 +20,19 @@ namespace AskHire_Backend.Controllers
         }
 
         // GET: api/CandidateVacancy/JobWiseVacancies
-
         [HttpGet("JobWiseVacancies")]
         public async Task<ActionResult<CandidateJobPagedResultDto<CandidateVacancyDto>>> GetJobWiseVacancies(
             [FromQuery] int pageNumber = 1,
             [FromQuery] string search = "",
-            [FromQuery] string sortOrder = "none") // 👈 add sortOrder
+            [FromQuery] string sortOrder = "none",
+            [FromQuery] bool isDemanded = false, 
+            [FromQuery] bool isLatest = false)   
         {
             const int pageSize = 9;
-            var result = await _candidateVacancyService.GetJobWiseVacanciesAsync(pageNumber, pageSize, search, sortOrder);
+            var result = await _candidateVacancyService.GetJobWiseVacanciesAsync(
+                pageNumber, pageSize, search, sortOrder, isDemanded, isLatest);
             return Ok(result);
         }
-
-
-
-
 
         [HttpGet("MostApplied")]
         public async Task<ActionResult<IEnumerable<CandidateVacancyDto>>> GetMostAppliedVacancies()
@@ -59,7 +58,5 @@ namespace AskHire_Backend.Controllers
             }
             return Ok(vacancy);
         }
-
-
     }
 }
