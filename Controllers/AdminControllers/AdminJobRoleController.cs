@@ -17,8 +17,11 @@ namespace AskHire_Backend.Controllers.AdminControllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<JobRole>>> GetJobRoles() =>
-            Ok(await _service.GetAllAsync());
+        public async Task<ActionResult> GetJobRoles(int page = 1, int pageSize = 5)
+        {
+            var paginatedResult = await _service.GetPaginatedAsync(page, pageSize);
+            return Ok(paginatedResult);
+        }
 
         [HttpGet("{jobId}")]
         public async Task<ActionResult<JobRole>> GetJobRoleById(Guid jobId)
