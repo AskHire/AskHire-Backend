@@ -25,8 +25,8 @@ namespace AskHire_Backend.Controllers
             [FromQuery] int pageNumber = 1,
             [FromQuery] string search = "",
             [FromQuery] string sortOrder = "none",
-            [FromQuery] bool isDemanded = false, 
-            [FromQuery] bool isLatest = false)   
+            [FromQuery] bool isDemanded = false,
+            [FromQuery] bool isLatest = false)
         {
             const int pageSize = 9;
             var result = await _candidateVacancyService.GetJobWiseVacanciesAsync(
@@ -49,14 +49,29 @@ namespace AskHire_Backend.Controllers
         }
 
         [HttpGet("{vacancyId}")]
-        public async Task<ActionResult<CandidateJobShowDto>> GetVacancyById(Guid vacancyId)
+        public async Task<ActionResult<CandidateJobShowDto>> GetVacancyById(Guid vacancyId, [FromQuery] Guid userId)
         {
-            var vacancy = await _candidateVacancyService.GetVacancyByIdAsync(vacancyId);
-            if (vacancy == null)
+            if (userId == Guid.Empty)
             {
-                return NotFound();
+                return BadRequest(new { message = "A valid userId is required as a query parameter." });
             }
-            return Ok(vacancy);
+
+            var (status, vacancy) = await _candidateVacancyService.GetVacancyByIdAsync(vacancyId, userId);
+
+            switch (status)
+            {
+                case "ALREADY_APPLIED":
+                    return Conflict(new { message = "You have already applied for this vacancy." });
+
+                case "NOT_FOUND":
+                    return NotFound();
+
+                case "FOUND":
+                    return Ok(vacancy);
+
+                default:
+                    return StatusCode(500, "An unexpected error occurred.");
+            }
         }
     }
 }

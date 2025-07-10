@@ -535,7 +535,7 @@ public class CandidateFileService : ICandidateFileService
             if (analysisResult.OverallScore >= vacancy.CVPassMark)
             {
                 application.Status = "CV Approved";
-                application.DashboardStatus = "Awaiting Pre-Screen";
+                application.DashboardStatus = "Applied";
             }
             else
             {

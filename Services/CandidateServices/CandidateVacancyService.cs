@@ -13,30 +13,32 @@ namespace AskHire_Backend.Services
 
         public CandidateVacancyService(ICandidateVacancyRepository candidateVacancyRepository)
         {
-            _candidateVacancyRepository = candidateVacancyRepository;
+            _candidateVacancyRepository = candidateVacancyRepository ?? throw new ArgumentNullException(nameof(candidateVacancyRepository));
         }
 
-        // <<< MODIFIED >>>
-        public async Task<CandidateJobPagedResultDto<CandidateVacancyDto>> GetJobWiseVacanciesAsync(
+        public Task<CandidateJobPagedResultDto<CandidateVacancyDto>> GetJobWiseVacanciesAsync(
             int pageNumber, int pageSize, string search, string sortOrder, bool isDemanded, bool isLatest)
         {
-            return await _candidateVacancyRepository.GetJobWiseVacanciesAsync(
-                pageNumber, pageSize, search, sortOrder, isDemanded, isLatest);
+            // Delegate the call directly to the repository
+            return _candidateVacancyRepository.GetJobWiseVacanciesAsync(pageNumber, pageSize, search, sortOrder, isDemanded, isLatest);
         }
 
-        public async Task<IEnumerable<CandidateVacancyDto>> GetMostAppliedVacanciesAsync()
+        public Task<IEnumerable<CandidateVacancyDto>> GetMostAppliedVacanciesAsync()
         {
-            return await _candidateVacancyRepository.GetMostAppliedVacanciesAsync();
+            // Delegate the call directly to the repository
+            return _candidateVacancyRepository.GetMostAppliedVacanciesAsync();
         }
 
-        public async Task<IEnumerable<CandidateVacancyDto>> GetLatestVacanciesAsync()
+        public Task<IEnumerable<CandidateVacancyDto>> GetLatestVacanciesAsync()
         {
-            return await _candidateVacancyRepository.GetLatestVacanciesAsync();
+            // Delegate the call directly to the repository
+            return _candidateVacancyRepository.GetLatestVacanciesAsync();
         }
 
-        public async Task<CandidateJobShowDto?> GetVacancyByIdAsync(Guid vacancyId)
+        public Task<(string status, CandidateJobShowDto? vacancy)> GetVacancyByIdAsync(Guid vacancyId, Guid userId)
         {
-            return await _candidateVacancyRepository.GetVacancyByIdAsync(vacancyId);
+            // Delegate the call directly to the repository
+            return _candidateVacancyRepository.GetVacancyByIdAsync(vacancyId, userId);
         }
     }
 }
