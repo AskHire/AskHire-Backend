@@ -9,6 +9,7 @@ obj/
 *.sln.docstates
 
 # ASP.NET
+appsettings.json
 appsettings.Development.json
 appsettings.Local.json
 secrets.json
