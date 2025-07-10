@@ -18,7 +18,6 @@ namespace AskHire_Backend.Data.Entities
         public DbSet<JobRole> JobRoles { get; set; }
 
         public DbSet<Reminder> Reminder { get; set; }
-
     }
 }
 

@@ -1,6 +1,7 @@
 ﻿using AskHire_Backend.Interfaces.Repositories.ManagerRepositories;
 using AskHire_Backend.Interfaces.Services.IManagerServices;
 using AskHire_Backend.Models.Entities;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,7 +22,7 @@ namespace AskHire_Backend.Services.ManagerServices
         // Fetch all available vacancies
         public async Task<IEnumerable<Vacancy>> GetVacanciesAsync()
         {
-            return await _candidateRepository.GetVacanciesAsync(); // Fetch vacancies from repository
+            return await _candidateRepository.GetVacanciesAsync();
         }
 
         public async Task<IEnumerable<object>> GetAllApplicationsAsync()
@@ -29,7 +30,7 @@ namespace AskHire_Backend.Services.ManagerServices
             return await _candidateRepository.GetAllApplicationsAsync();
         }
 
-        public async Task<object> GetApplicationByIdAsync(Guid applicationId)
+        public async Task<object?> GetApplicationByIdAsync(Guid applicationId)
         {
             return await _candidateRepository.GetApplicationByIdAsync(applicationId);
         }
@@ -51,7 +52,6 @@ namespace AskHire_Backend.Services.ManagerServices
                 throw new ArgumentException("Status must not be empty.");
             }
 
-            // Updated acceptable status values to include "longlist"
             string normalizedStatus = status.ToLower();
             if (!new[] { "longlist", "rejected", "pending" }.Contains(normalizedStatus))
             {
@@ -92,9 +92,79 @@ namespace AskHire_Backend.Services.ManagerServices
             return Path.GetFileName(cvPath);
         }
 
+        // Added DownloadCVAsync method that returns IActionResult
+        public async Task<IActionResult> DownloadCVAsync(Guid applicationId)
+        {
+            try
+            {
+                // Check if the application ID is valid
+                if (applicationId == Guid.Empty)
+                {
+                    return new BadRequestObjectResult("Invalid application ID");
+                }
+
+                var fileBytes = await GetCVFileAsync(applicationId);
+
+                // Check if the file bytes are null or empty
+                if (fileBytes == null || fileBytes.Length == 0)
+                {
+                    return new NotFoundObjectResult($"CV file for application ID {applicationId} is empty or not found");
+                }
+
+                var fileName = await GetCVFileNameAsync(applicationId);
+
+                // Check if the filename is valid
+                if (string.IsNullOrWhiteSpace(fileName))
+                {
+                    fileName = $"CV_{applicationId}.pdf";
+                }
+
+                var contentType = "application/pdf";
+
+                // Try to determine content type from file extension if not pdf
+                if (!fileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
+                {
+                    var extension = Path.GetExtension(fileName).ToLowerInvariant();
+                    switch (extension)
+                    {
+                        case ".docx":
+                            contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                            break;
+                        case ".doc":
+                            contentType = "application/msword";
+                            break;
+                            // Add more content types as needed
+                    }
+                }
+
+                return new FileContentResult(fileBytes, contentType)
+                {
+                    FileDownloadName = fileName
+                };
+            }
+            catch (FileNotFoundException ex)
+            {
+                return new NotFoundObjectResult(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return new BadRequestObjectResult(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return new BadRequestObjectResult(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return new ObjectResult($"An error occurred while downloading the CV: {ex.Message}")
+                {
+                    StatusCode = 500
+                };
+            }
+        }
+
         public async Task<object> GetStatisticsAsync()
         {
-            // Updated to use "longlist" instead of "qualified"
             int longlist = await _candidateRepository.GetApplicationCountByStatusAsync("longlist");
             int rejected = await _candidateRepository.GetApplicationCountByStatusAsync("rejected");
             int pending = await _candidateRepository.GetApplicationCountByStatusAsync("pending");
@@ -117,7 +187,6 @@ namespace AskHire_Backend.Services.ManagerServices
                 throw new KeyNotFoundException($"No vacancy found with id {vacancyId}");
             }
 
-            // Updated to use "longlist" instead of "qualified"
             int longlist = await _candidateRepository.GetApplicationCountByVacancyAndStatusAsync(vacancyId, "longlist");
             int rejected = await _candidateRepository.GetApplicationCountByVacancyAndStatusAsync(vacancyId, "rejected");
             int pending = await _candidateRepository.GetApplicationCountByVacancyAndStatusAsync(vacancyId, "pending");

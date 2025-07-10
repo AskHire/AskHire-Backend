@@ -1,3 +1,4 @@
+// File: Services/ManagerInterviewService.cs
 using AskHire_Backend.Data.Entities;
 using AskHire_Backend.Interfaces.Repositories.ManagerRepositories;
 using AskHire_Backend.Interfaces.Services.IManagerServices;
@@ -7,6 +8,7 @@ using AskHire_Backend.Models.DTOs.ManagerDTOs;
 using AskHire_Backend.Models.Entities;
 using AskHire_Backend.Repositories.Interfaces;
 using AskHire_Backend.Services.Interfaces;
+using AskHire_Backend.Interfaces.Repositories; // Add this line for IReminderRepository
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -17,11 +19,16 @@ namespace AskHire_Backend.Services.ManagerServices
     {
         private readonly IManagerInterviewRepository _interviewRepository;
         private readonly IManagerEmailService _emailService;
+        private readonly IReminderRepository _reminderRepository;
 
-        public ManagerInterviewService(IManagerInterviewRepository interviewRepository, IManagerEmailService emailService)
+        public ManagerInterviewService(
+            IManagerInterviewRepository interviewRepository,
+            IManagerEmailService emailService,
+            IReminderRepository reminderRepository)
         {
             _interviewRepository = interviewRepository ?? throw new ArgumentNullException(nameof(interviewRepository));
             _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
+            _reminderRepository = reminderRepository ?? throw new ArgumentNullException(nameof(reminderRepository));
         }
 
         public async Task<bool> ScheduleInterviewAsync(ManagerInterviewScheduleRequestDTO interviewRequest)
@@ -31,30 +38,19 @@ namespace AskHire_Backend.Services.ManagerServices
                 return false;
             }
 
-            // Get application with user details
             var application = await _interviewRepository.GetApplicationWithUserAsync(interviewRequest.ApplicationId);
             if (application == null || application.User == null)
             {
                 return false;
             }
 
-            // Convert string date, time, and duration to proper types
-            if (!DateTime.TryParse(interviewRequest.Date, out DateTime interviewDate))
+            if (!DateTime.TryParse(interviewRequest.Date, out DateTime interviewDate) ||
+                !TimeSpan.TryParse(interviewRequest.Time, out TimeSpan interviewTime) ||
+                !TimeSpan.TryParse(interviewRequest.Duration, out TimeSpan interviewDuration))
             {
                 return false;
             }
 
-            if (!TimeSpan.TryParse(interviewRequest.Time, out TimeSpan interviewTime))
-            {
-                return false;
-            }
-
-            if (!TimeSpan.TryParse(interviewRequest.Duration, out TimeSpan interviewDuration))
-            {
-                return false;
-            }
-
-            // Create interview entity
             var interview = new Interview
             {
                 ApplicationId = application.ApplicationId,
@@ -65,16 +61,23 @@ namespace AskHire_Backend.Services.ManagerServices
                 Interview_Instructions = interviewRequest.Interview_Instructions ?? string.Empty
             };
 
-            // Save interview
             var createdInterview = await _interviewRepository.CreateInterviewAsync(interview);
 
-            // Send email notification
+            var reminder = new Reminder
+            {
+                Title = $"{application.ApplicationId} -> {application.Vacancy.VacancyName}",
+                Description = interviewTime.ToString(),
+                Date = DateOnly.FromDateTime(interviewDate)
+            };
+
+            await _reminderRepository.CreateReminderAsync(reminder);
+
             if (application.User?.Email == null)
             {
                 return false;
             }
 
-            return await _emailService.SendInterviewEmailAsync(application.User.Email, interview).ConfigureAwait(false);
+            return await _emailService.SendInterviewEmailAsync(application.User.Email, interview);
         }
 
         public async Task<bool> UpdateInterviewAsync(Guid interviewId, ManagerInterviewScheduleRequestDTO interviewRequest)
@@ -84,69 +87,53 @@ namespace AskHire_Backend.Services.ManagerServices
                 return false;
             }
 
-            // Get existing interview by application ID
-            var existingInterview = await _interviewRepository.GetInterviewByApplicationIdAsync(interviewRequest.ApplicationId).ConfigureAwait(false);
+            var existingInterview = await _interviewRepository.GetInterviewByApplicationIdAsync(interviewRequest.ApplicationId);
             if (existingInterview == null)
             {
                 return false;
             }
 
-            // Get application with user details
-            var application = await _interviewRepository.GetApplicationWithUserAsync(existingInterview.ApplicationId).ConfigureAwait(false);
+            var application = await _interviewRepository.GetApplicationWithUserAsync(existingInterview.ApplicationId);
             if (application == null || application.User == null)
             {
                 return false;
             }
 
-            // Convert string date, time, and duration to proper types
-            if (!DateTime.TryParse(interviewRequest.Date, out DateTime interviewDate))
+            if (!DateTime.TryParse(interviewRequest.Date, out DateTime interviewDate) ||
+                !TimeSpan.TryParse(interviewRequest.Time, out TimeSpan interviewTime) ||
+                !TimeSpan.TryParse(interviewRequest.Duration, out TimeSpan interviewDuration))
             {
                 return false;
             }
 
-            if (!TimeSpan.TryParse(interviewRequest.Time, out TimeSpan interviewTime))
-            {
-                return false;
-            }
-
-            if (!TimeSpan.TryParse(interviewRequest.Duration, out TimeSpan interviewDuration))
-            {
-                return false;
-            }
-
-            // Update interview entity
             existingInterview.Date = interviewDate;
             existingInterview.Time = interviewTime;
             existingInterview.Duration = interviewDuration;
             existingInterview.Interview_Instructions = interviewRequest.Interview_Instructions ?? string.Empty;
 
-            // Save updated interview
-            await _interviewRepository.UpdateInterviewAsync(existingInterview).ConfigureAwait(false);
+            await _interviewRepository.UpdateInterviewAsync(existingInterview);
 
-            // Send email notification
             if (application.User?.Email == null)
             {
                 return false;
             }
 
-            return await _emailService.SendInterviewEmailAsync(application.User.Email, existingInterview).ConfigureAwait(false);
+            return await _emailService.SendInterviewEmailAsync(application.User.Email, existingInterview);
         }
 
         public async Task<Interview> GetInterviewByApplicationIdAsync(Guid applicationId)
         {
-            return await _interviewRepository.GetInterviewByApplicationIdAsync(applicationId).ConfigureAwait(false);
+            return await _interviewRepository.GetInterviewByApplicationIdAsync(applicationId);
         }
 
         public async Task<List<Interview>> GetAllInterviewsAsync()
         {
-            return await _interviewRepository.GetAllInterviewsAsync().ConfigureAwait(false);
+            return await _interviewRepository.GetAllInterviewsAsync();
         }
 
         public async Task<List<UserInterviewDetailsDto>> GetInterviewsByUserIdAsync(Guid userId)
         {
-            return await _interviewRepository.GetInterviewsByUserIdAsync(userId).ConfigureAwait(false);
+            return await _interviewRepository.GetInterviewsByUserIdAsync(userId);
         }
-
-        
     }
 }
