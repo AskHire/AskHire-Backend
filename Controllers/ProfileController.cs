@@ -3,71 +3,58 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using AskHire_Backend.Models.Entities;
 using AskHire_Backend.Models.DTOs;
+using AskHire_Backend.Interfaces.Services;
+using System.Security.Claims;
 
 
 [ApiController]
 [Route("api/[controller]")]
 public class ProfileController : ControllerBase
 {
-    private readonly UserManager<User> _userManager;
+    private readonly IProfileService _service;
 
-    public ProfileController(UserManager<User> userManager)
+    public ProfileController(IProfileService service) => _service = service;
+
+    [Authorize]
+    [HttpGet]
+    public async Task<IActionResult> GetProfile()
     {
-        _userManager = userManager;
-    }
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var user = await _service.GetProfileAsync(userId);
+        if (user == null) return NotFound();
 
-    [HttpGet("get-profile/{userId}")]
-    public async Task<IActionResult> GetProfile(Guid userId)
-    {
-        var user = await _userManager.FindByIdAsync(userId.ToString());
-        if (user == null) return NotFound("User not found.");
-
-        var dto = new UpdateProfileDto
+        return Ok(new
         {
-            UserId = user.Id,
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            MobileNumber = user.MobileNumber,
-            Gender = user.Gender,
-            Address = user.Address,
-            NIC = user.NIC,
-            DOB = user.DOB
-        };
-
-        return Ok(dto);
+            user.FirstName,
+            user.LastName,
+            user.Email,
+            user.Gender,
+            user.DOB,
+            user.MobileNumber,
+            user.Address,
+            user.Role,
+            user.ProfilePictureUrl,
+            user.SignUpDate
+        });
     }
 
-    [HttpPut("update-profile")]
-    public async Task<IActionResult> UpdateProfile(UpdateProfileDto dto)
+    [Authorize]
+    [HttpPut]
+    public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto dto)
     {
-        var user = await _userManager.FindByIdAsync(dto.UserId.ToString());
-        if (user == null) return NotFound("User not found.");
-
-        user.FirstName = dto.FirstName;
-        user.LastName = dto.LastName;
-        user.MobileNumber = dto.MobileNumber;
-        user.Gender = dto.Gender;
-        user.Address = dto.Address;
-        user.NIC = dto.NIC;
-        user.DOB = dto.DOB;
-
-        var result = await _userManager.UpdateAsync(user);
-        if (!result.Succeeded)
-            return BadRequest("Failed to update profile.");
-
-        return Ok("Profile updated.");
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var result = await _service.UpdateProfileAsync(userId, dto);
+        return result ? Ok("Updated") : BadRequest("Update failed");
     }
 
-    [HttpPost("change-password")]
-    public async Task<IActionResult> ChangePassword(ChangePasswordDto dto)
+    [Authorize]
+    [HttpPost("set-avatar")]
+    public async Task<IActionResult> SetAvatar([FromBody] string avatarFileName)
     {
-        var user = await _userManager.FindByIdAsync(dto.UserId.ToString());
-        if (user == null) return NotFound("User not found.");
-
-        var result = await _userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
-        if (!result.Succeeded)
-            return BadRequest(result.Errors);
-
-        return Ok("Password changed.");
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var success = await _service.SetAvatarAsync(userId, avatarFileName);
+        return success ? Ok(new { imageUrl = $"/avatars/{avatarFileName}" }) : BadRequest("Invalid avatar");
     }
 }
+
+

@@ -160,11 +160,17 @@ builder.Services.AddScoped<ICandidateVacancyRepository, CandidateVacancyReposito
 builder.Services.AddScoped<ICandidateVacancyService, CandidateVacancyService>();
 
 
+builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
+builder.Services.AddScoped<IProfileService, ProfileService>();
+
+
 
 var app = builder.Build();
 
 // CORS
 app.UseCors("AllowFrontend");
+
+app.UseStaticFiles();
 
 // Seed roles
 using (var scope = app.Services.CreateScope())
