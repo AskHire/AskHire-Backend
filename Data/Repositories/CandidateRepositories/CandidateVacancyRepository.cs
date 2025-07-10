@@ -25,7 +25,9 @@ namespace AskHire_Backend.Repositories
             var query = _context.Vacancies
                 .Include(v => v.JobRole)
                 .AsQueryable()
-                .Where(v => v.EndDate >= DateTime.UtcNow); // <<< MODIFIED: Filter out expired vacancies
+                // ❗ KEY FILTER: This line excludes vacancies where the end date has passed.
+                // This is why you only see 18 active vacancies out of 20 total.
+                .Where(v => v.EndDate >= DateTime.UtcNow);
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -55,7 +57,7 @@ namespace AskHire_Backend.Repositories
                 {
                     "a-z" => query.OrderBy(v => v.VacancyName),
                     "z-a" => query.OrderByDescending(v => v.VacancyName),
-                    _ => query.OrderByDescending(v => v.StartDate) // Default sort
+                    _ => query.OrderByDescending(v => v.StartDate)
                 };
             }
 
@@ -90,7 +92,7 @@ namespace AskHire_Backend.Repositories
         public async Task<IEnumerable<CandidateVacancyDto>> GetMostAppliedVacanciesAsync()
         {
             var topVacancyIds = await _context.Applies
-                .Where(a => a.Vacancy.EndDate >= DateTime.UtcNow) // <<< MODIFIED: Consider only active vacancies
+                .Where(a => a.Vacancy.EndDate >= DateTime.UtcNow)
                 .GroupBy(a => a.VacancyId)
                 .OrderByDescending(g => g.Count())
                 .Take(6)
@@ -116,7 +118,7 @@ namespace AskHire_Backend.Repositories
         public async Task<IEnumerable<CandidateVacancyDto>> GetLatestVacanciesAsync()
         {
             return await _context.Vacancies
-                .Where(v => v.EndDate >= DateTime.UtcNow) // <<< MODIFIED: Filter out expired vacancies
+                .Where(v => v.EndDate >= DateTime.UtcNow)
                 .OrderByDescending(v => v.StartDate)
                 .Take(6)
                 .Include(v => v.JobRole)
@@ -133,10 +135,18 @@ namespace AskHire_Backend.Repositories
                 .ToListAsync();
         }
 
-        public async Task<CandidateJobShowDto?> GetVacancyByIdAsync(Guid vacancyId)
+        public async Task<(string status, CandidateJobShowDto? vacancy)> GetVacancyByIdAsync(Guid vacancyId, Guid userId)
         {
-            return await _context.Vacancies
-                .Where(v => v.VacancyId == vacancyId && v.EndDate >= DateTime.UtcNow) // <<< MODIFIED: Ensure the selected vacancy is not expired
+            var hasApplied = await _context.Applies
+                .AnyAsync(a => a.VacancyId == vacancyId && a.UserId == userId);
+
+            if (hasApplied)
+            {
+                return ("ALREADY_APPLIED", null);
+            }
+
+            var vacancy = await _context.Vacancies
+                .Where(v => v.VacancyId == vacancyId && v.EndDate >= DateTime.UtcNow)
                 .Include(v => v.JobRole)
                 .Select(v => new CandidateJobShowDto
                 {
@@ -153,6 +163,13 @@ namespace AskHire_Backend.Repositories
                     WorkLocation = v.JobRole != null ? v.JobRole.WorkLocation : "N/A"
                 })
                 .FirstOrDefaultAsync();
+
+            if (vacancy == null)
+            {
+                return ("NOT_FOUND", null);
+            }
+
+            return ("FOUND", vacancy);
         }
     }
 }
