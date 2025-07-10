@@ -1,6 +1,9 @@
-﻿using AskHire_Backend.Interfaces.Repositories.CandidateRepositories;
+﻿using System.Net;
+using System.Net.Mail;
+using AskHire_Backend.Interfaces.Repositories.CandidateRepositories;
 using AskHire_Backend.Interfaces.Services.ICandidateServices;
 using AskHire_Backend.Models.DTOs.CandidateDTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace AskHire_Backend.Services.CandidateServices
 {
@@ -78,5 +81,45 @@ namespace AskHire_Backend.Services.CandidateServices
 
             return response;
         }
+
+        public Task<PreScreenPassMarkDto?> GetPreScreenPassMarkAndEmailAsync(Guid applicationId)
+        {
+            return _repository.GetPreScreenPassMarkAndEmailAsync(applicationId);
+        }
+
+        public async Task<bool> SendPreScreenPassMarkEmailAsync(string recipientEmail, int passMark)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(recipientEmail)) return false;
+
+                var message = new MailMessage
+                {
+                    From = new MailAddress("dimashiwickramage2002@gmail.com", "AskHire Team"),
+                    Subject = "Your Pre-Screen Pass Mark",
+                    Body = $"Dear Candidate,\n\nYour required Pre-Screen Mark is: {passMark}/100.\n\nGood luck!\n\nBest regards,\nAskHire Team",
+                    IsBodyHtml = false
+                };
+
+                message.To.Add(recipientEmail);
+
+                using var smtp = new SmtpClient("smtp.gmail.com", 587)
+                {
+                    Credentials = new NetworkCredential("dimashiwickramage2002@gmail.com", "fnxm msjt blvm vnmo"),
+                    EnableSsl = true
+                };
+
+                await smtp.SendMailAsync(message);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Email sending failed: " + ex.Message);
+                return false;
+            }
+        }
+
+
+
     }
 }
