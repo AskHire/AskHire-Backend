@@ -75,16 +75,27 @@ public class CandidateFileController : ControllerBase
         return await _service.AnalyzeApplicationAsync(applicationId);
     }
 
-    [HttpGet("{applicationId}/cvmark")]
-    public async Task<IActionResult> GetCVMark(Guid applicationId)
+    //[HttpGet("{applicationId}/cvmark")]
+    //public async Task<IActionResult> GetCVMark(Guid applicationId)
+    //{
+    //    var cvMark = await _service.GetCVMarkAsync(applicationId);
+
+    //    if (cvMark == null)
+    //    {
+    //        return NotFound("Application not found");
+    //    }
+
+    //    return Ok(cvMark);
+    //}
+
+    [HttpGet("{applicationId}/cv-status")]
+    public async Task<IActionResult> GetCVMarkAndStatus(Guid applicationId)
     {
-        var cvMark = await _service.GetCVMarkAsync(applicationId);
+        var result = await _service.GetCVMarkAndStatusAsync(applicationId);
 
-        if (cvMark == null)
-        {
+        if (result == null)
             return NotFound("Application not found");
-        }
 
-        return Ok(cvMark);
+        return Ok(result);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using AskHire_Backend.Data.Entities;
+using AskHire_Backend.Models.DTOs.CandidateDTOs;
 using AskHire_Backend.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,14 +33,25 @@ public class CandidateFileRepository : ICandidateFileRepository
             .FirstOrDefaultAsync(a => a.ApplicationId == applicationId);
     }
 
-    public async Task<int?> GetCVMarkByApplicationIdAsync(Guid applicationId)
+    //public async Task<int?> GetCVMarkByApplicationIdAsync(Guid applicationId)
+    //{
+    //    return await _context.Applies
+    //        .Where(a => a.ApplicationId == applicationId)
+    //        .Select(a => (int?)a.CV_Mark)
+    //        .FirstOrDefaultAsync();
+    //}
+
+    public async Task<ApplicationCVStatusDto?> GetCVMarkAndStatusAsync(Guid applicationId)
     {
         return await _context.Applies
             .Where(a => a.ApplicationId == applicationId)
-            .Select(a => (int?)a.CV_Mark)
+            .Select(a => new ApplicationCVStatusDto
+            {
+                CV_Mark = a.CV_Mark,
+                Status = a.Status
+            })
             .FirstOrDefaultAsync();
     }
-
 
     public Task SaveChangesAsync() =>
         _context.SaveChangesAsync();

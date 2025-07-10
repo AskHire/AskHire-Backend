@@ -1,4 +1,5 @@
-﻿using AskHire_Backend.Models.Entities;
+﻿using AskHire_Backend.Models.DTOs.CandidateDTOs;
+using AskHire_Backend.Models.Entities;
 
 public interface ICandidateFileRepository
 {
@@ -8,5 +9,6 @@ public interface ICandidateFileRepository
     Task AddApplicationAsync(Application application);
     Task SaveChangesAsync();
     Task<Application?> GetApplicationWithVacancyAsync(Guid applicationId);
-    Task<int?> GetCVMarkByApplicationIdAsync(Guid applicationId);
+    //Task<int?> GetCVMarkByApplicationIdAsync(Guid applicationId);
+    Task<ApplicationCVStatusDto?> GetCVMarkAndStatusAsync(Guid applicationId);
 }
