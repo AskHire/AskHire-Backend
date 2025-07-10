@@ -165,9 +165,12 @@ builder.Services.AddScoped<IJobRoleService, JobRoleService>();
 builder.Services.AddScoped<IReminderRepository, ReminderRepository>();
 builder.Services.AddScoped<IReminderService, ReminderService>();
 
-// ✅ Application Dashboard Summary (for Pie Chart)
+builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
+builder.Services.AddScoped<IProfileService, ProfileService>();
+
 builder.Services.AddScoped<IApplicationRepository, ApplicationRepository>();
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
+
 
 // ==============================
 // App Pipeline
@@ -177,7 +180,9 @@ var app = builder.Build();
 // Enable CORS
 app.UseCors("AllowFrontend");
 
-// Seed Roles
+app.UseStaticFiles();
+
+// Seed roles
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();

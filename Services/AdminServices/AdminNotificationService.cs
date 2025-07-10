@@ -23,4 +23,15 @@ public class   AdminNotificationService : IAdminNotificationService
     {
         return await _repository.CreateAsync(notification);
     }
+
+    public async Task<bool> DeleteAsync(Guid id)
+    {
+        var notification = await _repository.GetByIdAsync(id);
+        if (notification == null)
+        {
+            return false; // Notification not found
+        }
+        // Assuming the repository has a method to delete by id
+        return await _repository.DeleteAsync(id);
+    }
 }

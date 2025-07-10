@@ -27,4 +27,15 @@ public class AdminNotificationRepository : IAdminNotificationRepository
         await _context.SaveChangesAsync();
         return notification;
     }
+    public async Task<bool> DeleteAsync(Guid id)
+    {
+        var notification = await _context.Notifications.FindAsync(id);
+        if (notification == null)
+        {
+            return false; // Notification not found
+        }
+        _context.Notifications.Remove(notification);
+        await _context.SaveChangesAsync();
+        return true;
+    }
 }
