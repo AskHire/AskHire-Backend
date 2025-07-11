@@ -53,6 +53,19 @@ public class CandidateFileRepository : ICandidateFileRepository
             .FirstOrDefaultAsync();
     }
 
+    public async Task<ApplicationCVMarkDto?> GetCVMarkAndEmailAsync(Guid applicationId)
+    {
+        return await _context.Applies
+            .Where(a => a.ApplicationId == applicationId)
+            .Select(a => new ApplicationCVMarkDto
+            {
+                CV_Mark = a.CV_Mark,
+                UserEmail = a.User.Email
+            })
+            .FirstOrDefaultAsync();
+    }
+
+
     public Task SaveChangesAsync() =>
         _context.SaveChangesAsync();
 }
