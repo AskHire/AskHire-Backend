@@ -48,7 +48,7 @@ namespace AskHire_Backend.Repositories
             }
             else if (isDemanded)
             {
-                query = query.OrderByDescending(v => v.Applies.Count());
+                //query = query.OrderByDescending(v => v.Applies.Count());
             }
             else
             {
