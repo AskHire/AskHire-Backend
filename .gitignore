@@ -13,6 +13,8 @@ appsettings.Development.json
 appsettings.Local.json
 secrets.json
 
+
+
 # EF Core Migrations (optional, if you regenerate them)
 Migrations/
 
