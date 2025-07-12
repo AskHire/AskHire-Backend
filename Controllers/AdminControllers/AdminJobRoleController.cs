@@ -20,7 +20,7 @@ namespace AskHire_Backend.Controllers.AdminControllers
         public async Task<ActionResult> GetJobRoles(int page = 1, int pageSize = 5)
         {
             var paginatedResult = await _service.GetPaginatedAsync(page, pageSize);
-            return Ok(paginatedResult);
+            return Ok(paginatedResult); 
         }
 
         [HttpGet("{jobId}")]
