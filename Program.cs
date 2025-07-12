@@ -121,6 +121,8 @@ builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
 builder.Services.AddScoped<IManagerInterviewRepository, ManagerInterviewRepository>();
 builder.Services.AddScoped<IManagerInterviewService, ManagerInterviewService>();
 
+
+
 builder.Services.AddScoped<IManagerEmailService, ManagerEmailService>();
 builder.Services.AddScoped<IManagerNotificationRepository, ManagerNotificationRepository>();
 builder.Services.AddScoped<IManagerNotificationService, ManagerNotificationService>();
@@ -170,6 +172,11 @@ builder.Services.AddScoped<IProfileService, ProfileService>();
 
 builder.Services.AddScoped<IApplicationRepository, ApplicationRepository>();
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
+
+builder.Services.AddScoped<IManagerInterviewService, ManagerInterviewService>();
+
+
+
 
 
 // ==============================
