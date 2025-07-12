@@ -14,12 +14,17 @@ namespace AskHire_Backend.Services.ManagerServices
     {
         private readonly IManagerLongListInterviewRepository _repository;
         private readonly ILogger<ManagerLongListInterviewService> _logger;
-        private readonly IManagerEmailService _emailService; // Added reference to email service
+        private readonly IManagerEmailService _emailService;
+
+        // Constants for consistent status values
+        private const string LONGLIST_STATUS = "Longlist";
+        private const string PRE_SCREENING_DASHBOARD_STATUS = "Pre-Screening";
+        private const string INTERVIEW_DASHBOARD_STATUS = "Interview";
 
         public ManagerLongListInterviewService(
             IManagerLongListInterviewRepository repository,
             ILogger<ManagerLongListInterviewService> logger,
-            IManagerEmailService emailService) // Added email service to constructor
+            IManagerEmailService emailService)
         {
             _repository = repository;
             _logger = logger;
@@ -90,9 +95,10 @@ namespace AskHire_Backend.Services.ManagerServices
                     };
                 }
 
-                // Get unscheduled applications for this vacancy
+                // Get unscheduled applications for this vacancy with Status = "Longlist" and DashboardStatus = "Pre-Screening"
                 var unscheduledApplications = (await _repository.GetUnscheduledApplicationsAsync(vacancyId))
-                    .Where(a => a.Status.Equals("Longlist", StringComparison.OrdinalIgnoreCase))
+                    .Where(a => a.Status.Equals(LONGLIST_STATUS, StringComparison.OrdinalIgnoreCase) &&
+                               a.DashboardStatus.Equals(PRE_SCREENING_DASHBOARD_STATUS, StringComparison.OrdinalIgnoreCase))
                     .ToList();
 
                 if (!unscheduledApplications.Any())
@@ -153,6 +159,10 @@ namespace AskHire_Backend.Services.ManagerServices
                     bool saved = await _repository.SaveInterviewAsync(interview);
                     if (saved)
                     {
+                        // FIXED: Use consistent dashboard status
+                        application.DashboardStatus = INTERVIEW_DASHBOARD_STATUS;
+                        await _repository.UpdateApplicationAsync(application);
+
                         // Check if SendEmail is requested and send email notification
                         bool emailSent = true;
                         if (request.SendEmail && application.User?.Email != null)
@@ -255,8 +265,11 @@ namespace AskHire_Backend.Services.ManagerServices
                     };
                 }
 
-                // Get longlisted applications for this vacancy that haven't been scheduled yet
-                var longlistedApplications = await _repository.GetLongListApplicationsAsync(vacancyId);
+                // Get longlisted applications for this vacancy with Status = "Longlist" and DashboardStatus = "Pre-Screening"
+                var longlistedApplications = (await _repository.GetLongListApplicationsAsync(vacancyId))
+                    .Where(a => a.Status.Equals(LONGLIST_STATUS, StringComparison.OrdinalIgnoreCase) &&
+                               a.DashboardStatus.Equals(PRE_SCREENING_DASHBOARD_STATUS, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
 
                 if (!longlistedApplications.Any())
                 {
@@ -316,6 +329,10 @@ namespace AskHire_Backend.Services.ManagerServices
                     bool saved = await _repository.SaveInterviewAsync(interview);
                     if (saved)
                     {
+                        // FIXED: Use consistent dashboard status
+                        application.DashboardStatus = INTERVIEW_DASHBOARD_STATUS;
+                        await _repository.UpdateApplicationAsync(application);
+
                         // Check if SendEmail is requested and send email notification
                         bool emailSent = true;
                         if (request.SendEmail && application.User?.Email != null)
@@ -358,7 +375,11 @@ namespace AskHire_Backend.Services.ManagerServices
         {
             try
             {
-                var unscheduledApplications = await _repository.GetUnscheduledApplicationsAsync(vacancyId);
+                // Get unscheduled applications with Status = "Longlist" and DashboardStatus = "Pre-Screening"
+                var unscheduledApplications = (await _repository.GetUnscheduledApplicationsAsync(vacancyId))
+                    .Where(a => a.Status.Equals(LONGLIST_STATUS, StringComparison.OrdinalIgnoreCase) &&
+                               a.DashboardStatus.Equals(PRE_SCREENING_DASHBOARD_STATUS, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
 
                 var candidateDTOs = unscheduledApplications.Select(a => new UnscheduledCandidateDTO
                 {
@@ -368,7 +389,8 @@ namespace AskHire_Backend.Services.ManagerServices
                     Email = a.User.Email,
                     CVMark = a.CV_Mark,
                     PreScreenPassMark = a.Pre_Screen_PassMark,
-                    Status = a.Status
+                    Status = a.Status,
+                    DashboardStatus = a.DashboardStatus
                 }).ToList();
 
                 return candidateDTOs;
@@ -384,7 +406,11 @@ namespace AskHire_Backend.Services.ManagerServices
         {
             try
             {
-                var longlistedApplications = await _repository.GetLongListApplicationsAsync(vacancyId);
+                // Get longlisted applications with Status = "Longlist" and DashboardStatus = "Pre-Screening"
+                var longlistedApplications = (await _repository.GetLongListApplicationsAsync(vacancyId))
+                    .Where(a => a.Status.Equals(LONGLIST_STATUS, StringComparison.OrdinalIgnoreCase) &&
+                               a.DashboardStatus.Equals(PRE_SCREENING_DASHBOARD_STATUS, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
 
                 var candidateDTOs = longlistedApplications.Select(a => new UnscheduledCandidateDTO
                 {
@@ -394,7 +420,8 @@ namespace AskHire_Backend.Services.ManagerServices
                     Email = a.User.Email,
                     CVMark = a.CV_Mark,
                     PreScreenPassMark = a.Pre_Screen_PassMark,
-                    Status = a.Status
+                    Status = a.Status,
+                    DashboardStatus = a.DashboardStatus
                 }).ToList();
 
                 return candidateDTOs;
@@ -410,7 +437,11 @@ namespace AskHire_Backend.Services.ManagerServices
         {
             try
             {
-                var interviews = await _repository.GetScheduledInterviewsAsync(vacancyId);
+                // FIXED: Get scheduled interviews for applications with Status = "Longlist" and DashboardStatus = "Interview"
+                var interviews = (await _repository.GetScheduledInterviewsAsync(vacancyId))
+                    .Where(i => i.Application.Status.Equals(LONGLIST_STATUS, StringComparison.OrdinalIgnoreCase) &&
+                               i.Application.DashboardStatus.Equals(INTERVIEW_DASHBOARD_STATUS, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
 
                 var interviewDTOs = interviews.Select(i => new ScheduledInterviewDTO
                 {
@@ -420,7 +451,8 @@ namespace AskHire_Backend.Services.ManagerServices
                     Duration = i.Duration,
                     CandidateName = $"{i.Application.User.FirstName} {i.Application.User.LastName}",
                     CandidateEmail = i.Application.User.Email,
-                    Status = "Scheduled" // Since Interview entity doesn't have Status property
+                    Status = i.Application.Status,
+                    DashboardStatus = i.Application.DashboardStatus
                 }).ToList();
 
                 return interviewDTOs;

@@ -13,6 +13,7 @@ namespace AskHire_Backend.Controllers.Manager
     {
         private readonly IManagerLongListInterviewService _longListInterviewService;
         private readonly ILogger<ManagerLongListInterviewSchedulerController> _logger;
+        
 
         public ManagerLongListInterviewSchedulerController(
             IManagerLongListInterviewService longListInterviewService,
@@ -21,6 +22,11 @@ namespace AskHire_Backend.Controllers.Manager
             _longListInterviewService = longListInterviewService;
             _logger = logger;
         }
+       
+
+
+
+
 
         [HttpPost("schedule")]
         public async Task<IActionResult> ScheduleLongListInterviews([FromBody] ManagerLongListInterviewScheduleRequestDTO request)
