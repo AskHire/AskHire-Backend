@@ -8,21 +8,15 @@ namespace AskHire_Backend.Models.DTOs.ManagerDTOs
     {
         [Required]
         public string Vacancy { get; set; }
-
         [Required]
         public DateTime Date { get; set; }
-
         [Required]
         public string StartTime { get; set; }
-
         [Required]
         public string EndTime { get; set; }
-
         [Required]
         public string InterviewDuration { get; set; }
-
         public string InterviewInstructions { get; set; }
-
         public bool SendEmail { get; set; } = true;
     }
 
@@ -44,6 +38,7 @@ namespace AskHire_Backend.Models.DTOs.ManagerDTOs
         public int CVMark { get; set; }
         public int PreScreenPassMark { get; set; }
         public string Status { get; set; }
+        public string DashboardStatus { get; set; }
     }
 
     public class ScheduledInterviewDTO
@@ -55,5 +50,10 @@ namespace AskHire_Backend.Models.DTOs.ManagerDTOs
         public string CandidateName { get; set; }
         public string CandidateEmail { get; set; }
         public string Status { get; set; }
+        public string DashboardStatus { get; set; }
+
+
+
+
     }
 }

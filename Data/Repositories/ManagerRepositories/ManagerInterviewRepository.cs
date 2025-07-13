@@ -4,6 +4,7 @@ using AskHire_Backend.Interfaces.Repositories.ManagerRepositories;
 using AskHire_Backend.Models.DTOs.CandidateDTOs;
 using AskHire_Backend.Models.Entities;
 using AskHire_Backend.Repositories.Interfaces;
+using AskHire_Backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -20,12 +21,19 @@ namespace AskHire_Backend.Data.Repositories.ManagerRepositories
             _context = context;
         }
 
+
+
+
+
+
         public async Task<Application> GetApplicationWithUserAsync(Guid applicationId)
         {
             return await _context.Applies
                 .Include(a => a.User)
+                .Include(a => a.Vacancy) // ✅ Load the related Vacancy
                 .FirstOrDefaultAsync(a => a.ApplicationId == applicationId);
         }
+
 
         public async Task<Interview> CreateInterviewAsync(Interview interview)
         {

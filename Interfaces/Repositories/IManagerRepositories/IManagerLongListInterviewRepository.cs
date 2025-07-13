@@ -14,5 +14,7 @@ namespace AskHire_Backend.Interfaces.Repositories.IManagerRepositories
         Task<bool> HasExistingInterviewAsync(Guid applicationId);
         Task<bool> SaveInterviewAsync(Interview interview);
         Task<IEnumerable<Interview>> GetScheduledInterviewsAsync(Guid vacancyId);
+
+        Task<bool> UpdateApplicationAsync(Application application);
     }
 }
