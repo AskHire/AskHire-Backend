@@ -1,4 +1,5 @@
 ﻿using AskHire_Backend.Models.DTOs;
+using AskHire_Backend.Models.DTOs.AdminDTOs.PaginationDTOs;
 using AskHire_Backend.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,6 +21,14 @@ namespace AskHire_Backend.Controllers.AdminControllers
         {
             DashboardStatsDto stats = await _dashboardService.GetDashboardStatsAsync();
             return Ok(stats);
+        }
+
+        // GET api/admindashboard/vacancy-tracking
+        [HttpGet("vacancy-tracking")]
+        public async Task<IActionResult> GetVacancyTracking([FromQuery] PaginationQuery query)
+        {
+            var result = await _dashboardService.GetPagedVacancyTrackingAsync(query);
+            return Ok(result);
         }
     }
 }

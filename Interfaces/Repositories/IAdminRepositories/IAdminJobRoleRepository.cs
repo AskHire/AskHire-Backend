@@ -1,4 +1,5 @@
-﻿using AskHire_Backend.Models.Entities;
+﻿using AskHire_Backend.Models.DTOs.AdminDTOs.PaginationDTOs;
+using AskHire_Backend.Models.Entities;
 
 namespace AskHire_Backend.Interfaces.Repositories.AdminRepositories
 {
@@ -9,8 +10,8 @@ namespace AskHire_Backend.Interfaces.Repositories.AdminRepositories
         Task AddAsync(JobRole jobRole);
         Task UpdateAsync(JobRole jobRole);
         Task DeleteAsync(Guid jobId);
-        Task<int> GetTotalCountAsync();
-        Task<IEnumerable<JobRole>> GetPaginatedAsync(int skip, int take);
 
+        // ✅ Updated
+        Task<PaginatedResult<JobRole>> GetPaginatedAsync(PaginationQuery query);
     }
 }
