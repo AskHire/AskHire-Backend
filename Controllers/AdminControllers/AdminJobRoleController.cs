@@ -1,7 +1,9 @@
 ﻿using AskHire_Backend.Models.Entities;
+using AskHire_Backend.Models.DTOs.AdminDTOs.PaginationDTOs;
 using AskHire_Backend.Services;
 using Microsoft.AspNetCore.Mvc;
-
+using System;
+using System.Threading.Tasks;
 
 namespace AskHire_Backend.Controllers.AdminControllers
 {
@@ -16,10 +18,13 @@ namespace AskHire_Backend.Controllers.AdminControllers
             _service = service;
         }
 
+        // ✅ Updated to support pagination, search & sorting using PaginationQuery
         [HttpGet]
-        public async Task<ActionResult> GetJobRoles(int page = 1, int pageSize = 5)
+        public async Task<ActionResult> GetJobRoles([FromQuery] PaginationQuery query)
         {
-            var paginatedResult = await _service.GetPaginatedAsync(page, pageSize);
+
+            var paginatedResult = await _service.GetPaginatedAsync(query);
+
             return Ok(paginatedResult);
         }
 
@@ -30,8 +35,6 @@ namespace AskHire_Backend.Controllers.AdminControllers
             if (job == null) return NotFound();
             return Ok(job);
         }
-
-
 
         [HttpPost]
         public async Task<ActionResult<JobRole>> CreateJobRole(JobRole jobRole)

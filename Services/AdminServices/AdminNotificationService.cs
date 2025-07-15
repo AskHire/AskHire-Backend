@@ -1,4 +1,5 @@
-﻿using AskHire_Backend.Models.Entities;
+﻿using AskHire_Backend.Models.DTOs.AdminDTOs.PaginationDTOs;
+using AskHire_Backend.Models.Entities;
 
 public class   AdminNotificationService : IAdminNotificationService
 {
@@ -34,4 +35,10 @@ public class   AdminNotificationService : IAdminNotificationService
         // Assuming the repository has a method to delete by id
         return await _repository.DeleteAsync(id);
     }
+
+    public async Task<PaginatedResult<Notification>> GetPagedAsync(PaginationQuery query)
+    {
+        return await _repository.GetPagedAsync(query);
+    }
+
 }

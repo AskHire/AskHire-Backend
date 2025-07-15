@@ -1,6 +1,7 @@
-﻿using AskHire_Backend.Data;
-using AskHire_Backend.Data.Entities;
-using AskHire_Backend.Models.Entities;
+
+﻿using AskHire_Backend.Models.DTOs;
+using AskHire_Backend.Models.DTOs.AdminDTOs.PaginationDTOs;
+using AskHire_Backend.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,6 +33,14 @@ namespace AskHire_Backend.Controllers.AdminControllers
                 totalManagers,
                 totalJobs
             });
+        }
+
+        // GET api/admindashboard/vacancy-tracking
+        [HttpGet("vacancy-tracking")]
+        public async Task<IActionResult> GetVacancyTracking([FromQuery] PaginationQuery query)
+        {
+            var result = await _dashboardService.GetPagedVacancyTrackingAsync(query);
+            return Ok(result);
         }
     }
 }
