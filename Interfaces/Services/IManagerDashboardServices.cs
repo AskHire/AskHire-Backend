@@ -9,5 +9,7 @@ namespace AskHire_Backend.Interfaces.Services
         Task<int> GetTotalJobsAsync();
         Task<int> GetTotalInterviewsAsync();
         Task<Dictionary<string, int>> GetWeeklyInterviewCountAsync();
+        Task<int> GetTotalRemindersTodayAsync();
+
     }
 }

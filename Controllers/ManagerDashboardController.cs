@@ -77,5 +77,21 @@ namespace AskHire_Backend.Controllers
             }
         }
 
+        [HttpGet("total-reminders-today")]
+        public async Task<IActionResult> GetTotalRemindersToday()
+        {
+            try
+            {
+                var count = await _ManagerService.GetTotalRemindersTodayAsync();
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching total reminders today.");
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+
     }
 }

@@ -88,5 +88,15 @@ namespace AskHire_Backend.Repositories
 
             return result;
         }
+
+        public async Task<int> GetTotalRemindersTodayAsync()
+        {
+            using var connection = new SqlConnection(_connectionString);
+            await connection.OpenAsync();
+            const string query = "SELECT COUNT(*) FROM Reminder WHERE CAST([Date] AS DATE) = CAST(GETDATE() AS DATE)";
+            using var command = new SqlCommand(query, connection);
+            var result = await command.ExecuteScalarAsync();
+            return result != null ? Convert.ToInt32(result) : 0;
+        }
     }
 }

@@ -33,5 +33,10 @@ namespace AskHire_Backend.Services
         {
             return await _managerDashboardRepository.GetWeeklyInterviewCountAsync();
         }
+
+        public async Task<int> GetTotalRemindersTodayAsync()
+        {
+            return await _managerDashboardRepository.GetTotalRemindersTodayAsync();
+        }
     }
 }
