@@ -1,8 +1,14 @@
-﻿namespace AskHire_Backend.Models.DTOs
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace AskHire_Backend.Models.DTOs
 {
     public class UserDto
     {
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Email is required.")]
+        [EmailAddress(ErrorMessage = "Invalid email format.")]
+        public string Email { get; set; }
+
+        [Required(ErrorMessage = "Password is required.")]
+        public string Password { get; set; }
     }
 }

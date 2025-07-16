@@ -49,13 +49,9 @@ namespace AskHire_Backend.Controllers
         }
 
         [HttpGet("{vacancyId}")]
-        public async Task<ActionResult<CandidateJobShowDto>> GetVacancyById(Guid vacancyId, [FromQuery] Guid userId)
+        // userId is now nullable
+        public async Task<ActionResult<CandidateJobShowDto>> GetVacancyById(Guid vacancyId, [FromQuery] Guid? userId)
         {
-            if (userId == Guid.Empty)
-            {
-                return BadRequest(new { message = "A valid userId is required as a query parameter." });
-            }
-
             var (status, vacancy) = await _candidateVacancyService.GetVacancyByIdAsync(vacancyId, userId);
 
             switch (status)
