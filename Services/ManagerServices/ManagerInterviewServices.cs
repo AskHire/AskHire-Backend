@@ -1,5 +1,7 @@
 // File: Services/ManagerInterviewService.cs
+
 using AskHire_Backend.Data.Entities;
+using AskHire_Backend.Interfaces.Repositories;
 using AskHire_Backend.Interfaces.Repositories.ManagerRepositories;
 using AskHire_Backend.Interfaces.Services.IManagerServices;
 using AskHire_Backend.Models.DTOs;
@@ -8,7 +10,6 @@ using AskHire_Backend.Models.DTOs.ManagerDTOs;
 using AskHire_Backend.Models.Entities;
 using AskHire_Backend.Repositories.Interfaces;
 using AskHire_Backend.Services.Interfaces;
-using AskHire_Backend.Interfaces.Repositories; // Add this line for IReminderRepository
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -34,22 +35,18 @@ namespace AskHire_Backend.Services.ManagerServices
         public async Task<bool> ScheduleInterviewAsync(ManagerInterviewScheduleRequestDTO interviewRequest)
         {
             if (interviewRequest == null)
-            {
                 return false;
-            }
 
+            // Load Application with User and Vacancy
             var application = await _interviewRepository.GetApplicationWithUserAsync(interviewRequest.ApplicationId);
-            if (application == null || application.User == null)
-            {
+
+            if (application == null || application.User == null || application.Vacancy == null)
                 return false;
-            }
 
             if (!DateTime.TryParse(interviewRequest.Date, out DateTime interviewDate) ||
                 !TimeSpan.TryParse(interviewRequest.Time, out TimeSpan interviewTime) ||
                 !TimeSpan.TryParse(interviewRequest.Duration, out TimeSpan interviewDuration))
-            {
                 return false;
-            }
 
             var interview = new Interview
             {
@@ -63,6 +60,7 @@ namespace AskHire_Backend.Services.ManagerServices
 
             var createdInterview = await _interviewRepository.CreateInterviewAsync(interview);
 
+            // ? No NullReferenceException because Vacancy is included now
             var reminder = new Reminder
             {
                 Title = $"{application.ApplicationId} -> {application.Vacancy.VacancyName}",
@@ -72,10 +70,8 @@ namespace AskHire_Backend.Services.ManagerServices
 
             await _reminderRepository.CreateReminderAsync(reminder);
 
-            if (application.User?.Email == null)
-            {
+            if (string.IsNullOrEmpty(application.User?.Email))
                 return false;
-            }
 
             return await _emailService.SendInterviewEmailAsync(application.User.Email, interview);
         }
@@ -83,28 +79,22 @@ namespace AskHire_Backend.Services.ManagerServices
         public async Task<bool> UpdateInterviewAsync(Guid interviewId, ManagerInterviewScheduleRequestDTO interviewRequest)
         {
             if (interviewRequest == null)
-            {
                 return false;
-            }
 
             var existingInterview = await _interviewRepository.GetInterviewByApplicationIdAsync(interviewRequest.ApplicationId);
+
             if (existingInterview == null)
-            {
                 return false;
-            }
 
             var application = await _interviewRepository.GetApplicationWithUserAsync(existingInterview.ApplicationId);
+
             if (application == null || application.User == null)
-            {
                 return false;
-            }
 
             if (!DateTime.TryParse(interviewRequest.Date, out DateTime interviewDate) ||
                 !TimeSpan.TryParse(interviewRequest.Time, out TimeSpan interviewTime) ||
                 !TimeSpan.TryParse(interviewRequest.Duration, out TimeSpan interviewDuration))
-            {
                 return false;
-            }
 
             existingInterview.Date = interviewDate;
             existingInterview.Time = interviewTime;
@@ -113,10 +103,8 @@ namespace AskHire_Backend.Services.ManagerServices
 
             await _interviewRepository.UpdateInterviewAsync(existingInterview);
 
-            if (application.User?.Email == null)
-            {
+            if (string.IsNullOrEmpty(application.User?.Email))
                 return false;
-            }
 
             return await _emailService.SendInterviewEmailAsync(application.User.Email, existingInterview);
         }

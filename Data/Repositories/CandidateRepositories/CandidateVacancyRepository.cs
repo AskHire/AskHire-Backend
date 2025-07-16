@@ -135,14 +135,19 @@ namespace AskHire_Backend.Repositories
                 .ToListAsync();
         }
 
-        public async Task<(string status, CandidateJobShowDto? vacancy)> GetVacancyByIdAsync(Guid vacancyId, Guid userId)
+        // MODIFIED METHOD SIGNATURE - userId is now nullable
+        public async Task<(string status, CandidateJobShowDto? vacancy)> GetVacancyByIdAsync(Guid vacancyId, Guid? userId)
         {
-            var hasApplied = await _context.Applies
-                .AnyAsync(a => a.VacancyId == vacancyId && a.UserId == userId);
-
-            if (hasApplied)
+            // Only check if already applied if a userId is provided
+            if (userId.HasValue)
             {
-                return ("ALREADY_APPLIED", null);
+                var hasApplied = await _context.Applies
+                    .AnyAsync(a => a.VacancyId == vacancyId && a.UserId == userId.Value);
+
+                if (hasApplied)
+                {
+                    return ("ALREADY_APPLIED", null);
+                }
             }
 
             var vacancy = await _context.Vacancies

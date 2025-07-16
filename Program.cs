@@ -26,6 +26,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.Extensions.Logging; // Add this using directive
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +51,20 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<CandidateFileService>();
 builder.Services.AddHttpClient();
+
+// ==============================
+// Add Logging Services
+// This registers ILogger and its providers.
+// You can configure specific providers (Console, Debug, etc.) here.
+// ==============================
+builder.Services.AddLogging(loggingBuilder =>
+{
+    loggingBuilder.ClearProviders(); // Clears default console/debug providers that might be added automatically
+    loggingBuilder.AddConsole(); // Adds console logging
+    loggingBuilder.AddDebug(); // Adds debug output logging
+    // You can add more specific logging providers here, e.g., for files, databases, or cloud services.
+});
+
 
 // ==============================
 // Database Context
@@ -121,6 +136,7 @@ builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
 builder.Services.AddScoped<IManagerInterviewRepository, ManagerInterviewRepository>();
 builder.Services.AddScoped<IManagerInterviewService, ManagerInterviewService>();
 
+
 builder.Services.AddScoped<IManagerEmailService, ManagerEmailService>();
 builder.Services.AddScoped<IManagerNotificationRepository, ManagerNotificationRepository>();
 builder.Services.AddScoped<IManagerNotificationService, ManagerNotificationService>();
@@ -171,6 +187,8 @@ builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IApplicationRepository, ApplicationRepository>();
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
 
+builder.Services.AddScoped<IManagerInterviewService, ManagerInterviewService>();
+
 
 // ==============================
 // App Pipeline
@@ -199,7 +217,8 @@ using (var scope = app.Services.CreateScope())
 
 // Development tools
 if (app.Environment.IsDevelopment())
-{    app.UseSwagger();
+{
+    app.UseSwagger();
     app.UseSwaggerUI();
 }
 

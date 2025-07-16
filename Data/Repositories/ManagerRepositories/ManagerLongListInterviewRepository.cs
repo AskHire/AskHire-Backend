@@ -82,10 +82,14 @@ namespace AskHire_Backend.Repositories.ManagerRepositories
                 .Include(i => i.Application)
                     .ThenInclude(a => a.User)
                 .Where(i => i.Application.VacancyId == vacancyId)
+                .Where(i => i.Application.Status == "Longlist" && i.Application.DashboardStatus == "Interview")
                 .ToListAsync()
                 .ConfigureAwait(false);
         }
 
-
+        Task<bool> IManagerLongListInterviewRepository.UpdateApplicationAsync(Application application)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

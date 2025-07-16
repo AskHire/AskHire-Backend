@@ -15,7 +15,11 @@ namespace AskHire_Backend.Services.Interfaces
         Task<Interview> GetInterviewByApplicationIdAsync(Guid applicationId);
         Task<List<Interview>> GetAllInterviewsAsync();
         Task<List<UserInterviewDetailsDto>> GetInterviewsByUserIdAsync(Guid userId);
-        
+       
+
+
+
+
 
     }
 }

@@ -61,5 +61,37 @@ namespace AskHire_Backend.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+
+        [HttpGet("weekly-interview-count")]
+        public async Task<IActionResult> GetWeeklyInterviewCount()
+        {
+            try
+            {
+                var counts = await _ManagerService.GetWeeklyInterviewCountAsync();
+                return Ok(counts);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching weekly interview count.");
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("total-reminders-today")]
+        public async Task<IActionResult> GetTotalRemindersToday()
+        {
+            try
+            {
+                var count = await _ManagerService.GetTotalRemindersTodayAsync();
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching total reminders today.");
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+
     }
 }
