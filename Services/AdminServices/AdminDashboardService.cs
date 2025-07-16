@@ -1,5 +1,7 @@
 ﻿using AskHire_Backend.Interfaces.Repositories.AdminRepositories;
 using AskHire_Backend.Models.DTOs;
+using AskHire_Backend.Models.DTOs.AdminDTOs;
+using AskHire_Backend.Models.DTOs.AdminDTOs.PaginationDTOs;
 
 namespace AskHire_Backend.Services.AdminServices
 {
@@ -19,7 +21,7 @@ namespace AskHire_Backend.Services.AdminServices
             var totalCandidates = await _adminRepository.GetTotalCandidatesAsync();
             var totalJobs = await _adminRepository.GetTotalJobsAsync();
             var monthlySignups = await _adminRepository.GetMonthlySignupsAsync();
-            var usersByAgeGroup = await _adminRepository.GetUsersByAgeGroupAsync(); 
+            var usersByAgeGroup = await _adminRepository.GetUsersByAgeGroupAsync();
 
             return new DashboardStatsDto
             {
@@ -28,8 +30,13 @@ namespace AskHire_Backend.Services.AdminServices
                 TotalCandidates = totalCandidates,
                 TotalJobs = totalJobs,
                 SignupsPerMonth = monthlySignups,
-                UsersByAgeGroup = usersByAgeGroup 
+                UsersByAgeGroup = usersByAgeGroup
             };
+        }
+
+        public async Task<PaginatedResult<VacancyDashboardDto>> GetPagedVacancyTrackingAsync(PaginationQuery query)
+        {
+            return await _adminRepository.GetPagedVacancyTrackingTableAsync(query);
         }
 
     }
