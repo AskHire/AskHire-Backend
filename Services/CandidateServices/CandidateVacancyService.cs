@@ -35,7 +35,8 @@ namespace AskHire_Backend.Services
             return _candidateVacancyRepository.GetLatestVacanciesAsync();
         }
 
-        public Task<(string status, CandidateJobShowDto? vacancy)> GetVacancyByIdAsync(Guid vacancyId, Guid userId)
+        // MODIFIED METHOD SIGNATURE - userId is now nullable
+        public Task<(string status, CandidateJobShowDto? vacancy)> GetVacancyByIdAsync(Guid vacancyId, Guid? userId)
         {
             // Delegate the call directly to the repository
             return _candidateVacancyRepository.GetVacancyByIdAsync(vacancyId, userId);
