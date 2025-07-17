@@ -325,7 +325,7 @@ public class CandidateFileService : ICandidateFileService
             return new NotFoundObjectResult("CV not found.");
 
         var blobUrl = new Uri(application.CVFilePath);
-        var blobName = blobUrl.AbsolutePath.TrimStart('/').Replace($"{_blobContainer.Name}/", "");
+        var blobName = ExtractBlobNameFromUrl(blobUrl);
         var blob = _blobContainer.GetBlobClient(blobName);
 
         if (!await blob.ExistsAsync())
@@ -345,7 +345,7 @@ public class CandidateFileService : ICandidateFileService
             return new NotFoundObjectResult("CV not found.");
 
         var blobUrl = new Uri(application.CVFilePath);
-        var blobName = blobUrl.AbsolutePath.TrimStart('/').Replace($"{_blobContainer.Name}/", "");
+        var blobName = ExtractBlobNameFromUrl(blobUrl);
         var blob = _blobContainer.GetBlobClient(blobName);
 
         await blob.DeleteIfExistsAsync();
@@ -681,4 +681,3 @@ public class CandidateFileService : ICandidateFileService
     }
 
 }
-
