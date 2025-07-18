@@ -17,7 +17,7 @@ public class ProfileController : ControllerBase
 
     [Authorize]
     [HttpGet]
-    
+
     public async Task<IActionResult> GetProfile()
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
@@ -63,5 +63,4 @@ public class ProfileController : ControllerBase
         return success ? Ok(new { imageUrl = $"/avatars/{avatarFileName}" }) : BadRequest("Invalid avatar");
     }
 }
-
 
