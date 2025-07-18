@@ -1,4 +1,5 @@
-﻿using AskHire_Backend.Services.Interfaces;
+﻿using AskHire_Backend.DTOs;
+using AskHire_Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AskHire_Backend.Controllers.CandidateControllers
@@ -18,8 +19,14 @@ namespace AskHire_Backend.Controllers.CandidateControllers
         public async Task<IActionResult> GetCandidateApplications(Guid userId)
         {
             var result = await _service.GetCandidateApplicationsAsync(userId);
+
+            // RECOMMENDED CHANGE: Return 200 OK with an empty list if no applications are found
+            // A 404 Not Found usually means the resource itself (like the user ID in the path) wasn't found,
+            // not that the resource exists but has no related items.
             if (result == null || !result.Any())
-                return NotFound("No applications found.");
+            {
+                return Ok(new List<CandidateDashboardDto>()); // Return an empty list
+            }
 
             return Ok(result);
         }
@@ -33,6 +40,5 @@ namespace AskHire_Backend.Controllers.CandidateControllers
 
             return NoContent();
         }
-
     }
 }
