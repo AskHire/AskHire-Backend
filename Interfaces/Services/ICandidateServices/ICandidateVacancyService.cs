@@ -14,7 +14,7 @@ namespace AskHire_Backend.Services
         Task<IEnumerable<CandidateVacancyDto>> GetMostAppliedVacanciesAsync();
         Task<IEnumerable<CandidateVacancyDto>> GetLatestVacanciesAsync();
 
-        // MODIFIED METHOD SIGNATURE
-        Task<(string status, CandidateJobShowDto? vacancy)> GetVacancyByIdAsync(Guid vacancyId, Guid userId);
+        // MODIFIED METHOD SIGNATURE - userId is now nullable
+        Task<(string status, CandidateJobShowDto? vacancy)> GetVacancyByIdAsync(Guid vacancyId, Guid? userId);
     }
 }

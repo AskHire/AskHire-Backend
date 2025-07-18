@@ -17,11 +17,17 @@ public class ProfileController : ControllerBase
 
     [Authorize]
     [HttpGet]
+
     public async Task<IActionResult> GetProfile()
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var user = await _service.GetProfileAsync(userId);
         if (user == null) return NotFound();
+
+        // Set default avatar if none exists
+        var profilePictureUrl = string.IsNullOrWhiteSpace(user.ProfilePictureUrl)
+            ? null
+            : user.ProfilePictureUrl;
 
         return Ok(new
         {
@@ -33,10 +39,11 @@ public class ProfileController : ControllerBase
             user.MobileNumber,
             user.Address,
             user.Role,
-            user.ProfilePictureUrl,
+            ProfilePictureUrl = profilePictureUrl,
             user.SignUpDate
         });
     }
+
 
     [Authorize]
     [HttpPut]
@@ -56,5 +63,4 @@ public class ProfileController : ControllerBase
         return success ? Ok(new { imageUrl = $"/avatars/{avatarFileName}" }) : BadRequest("Invalid avatar");
     }
 }
-
 

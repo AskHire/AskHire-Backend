@@ -1,6 +1,7 @@
 ﻿using AskHire_Backend.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+// Assuming AskHire_Backend.Data.Entities is where User and AppDbContext are defined
 using AskHire_Backend.Data.Entities;
 
 namespace AskHire_Backend.Data.Repositories
@@ -50,6 +51,5 @@ namespace AskHire_Backend.Data.Repositories
             return await _context.Users
                 .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
         }
-
     }
 }
