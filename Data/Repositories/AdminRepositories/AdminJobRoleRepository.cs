@@ -1,6 +1,7 @@
 ﻿using AskHire_Backend.Data;
 using AskHire_Backend.Data.Entities;
 using AskHire_Backend.Interfaces.Repositories.AdminRepositories;
+using AskHire_Backend.Models.DTOs.AdminDTOs.PaginationDTOs;
 using AskHire_Backend.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -22,8 +23,9 @@ namespace AskHire_Backend.Data.Repositories.AdminRepositories
         public async Task<IEnumerable<JobRole>> GetAllAsync() =>
             await _context.JobRoles.ToListAsync();
 
-        public async Task<JobRole> GetByIdAsync(Guid jobId) =>
-            await _context.JobRoles.FindAsync(jobId);
+        public async Task<JobRole?> GetByIdAsync(Guid jobId) =>
+    await _context.JobRoles.FindAsync(jobId);
+
 
         public async Task AddAsync(JobRole jobRole)
         {
@@ -47,20 +49,45 @@ namespace AskHire_Backend.Data.Repositories.AdminRepositories
             }
         }
 
-        // ✅ New: Get total count for pagination
-        public async Task<int> GetTotalCountAsync()
+        // ✅ New unified pagination method with search + sort
+        public async Task<PaginatedResult<JobRole>> GetPaginatedAsync(PaginationQuery query)
         {
-            return await _context.JobRoles.CountAsync();
-        }
+            var dataQuery = _context.JobRoles.AsQueryable();
 
-        // ✅ New: Get paginated data
-        public async Task<IEnumerable<JobRole>> GetPaginatedAsync(int skip, int take)
-        {
-            return await _context.JobRoles
-                .OrderBy(j => j.JobTitle) // Optional: order by something
-                .Skip(skip)
-                .Take(take)
+            // 🔍 Search by JobTitle
+            if (!string.IsNullOrWhiteSpace(query.SearchTerm))
+            {
+                dataQuery = dataQuery.Where(j => j.JobTitle.Contains(query.SearchTerm));
+            }
+
+            // 🔃 Sort by JobTitle
+            if (!string.IsNullOrWhiteSpace(query.SortBy) && query.SortBy.Equals("JobTitle", StringComparison.OrdinalIgnoreCase))
+            {
+                dataQuery = query.IsDescending
+                    ? dataQuery.OrderByDescending(j => j.JobTitle)
+                    : dataQuery.OrderBy(j => j.JobTitle);
+            }
+            else
+            {
+                // Optional: default sort by JobTitle ascending
+                dataQuery = dataQuery.OrderBy(j => j.JobTitle);
+            }
+
+            // 📄 Pagination
+            var totalCount = await dataQuery.CountAsync();
+            var items = await dataQuery
+                .Skip((query.Page - 1) * query.PageSize)
+                .Take(query.PageSize)
                 .ToListAsync();
+
+            return new PaginatedResult<JobRole>
+            {
+                Page = query.Page,
+                PageSize = query.PageSize,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)query.PageSize),
+                Data = items
+            };
         }
     }
 }

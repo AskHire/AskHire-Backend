@@ -1,5 +1,8 @@
 ﻿using AskHire_Backend.Models.DTOs.AdminDTOs.PaginationDTOs;
 using AskHire_Backend.Models.Entities;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace AskHire_Backend.Services
 {
@@ -10,7 +13,8 @@ namespace AskHire_Backend.Services
         Task<JobRole> CreateAsync(JobRole jobRole);
         Task<JobRole> UpdateAsync(Guid jobId, JobRole jobRole);
         Task<bool> DeleteAsync(Guid jobId);
-        Task<PaginatedResult<JobRole>> GetPaginatedAsync(int page, int pageSize);
 
+        // ✅ Updated method
+        Task<PaginatedResult<JobRole>> GetPaginatedAsync(PaginationQuery query);
     }
 }

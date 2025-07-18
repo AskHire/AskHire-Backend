@@ -1,9 +1,6 @@
-﻿using AskHire_Backend.Interfaces.Repositories;
-using AskHire_Backend.Interfaces.Repositories.AdminRepositories;
-using AskHire_Backend.Interfaces.Services;
+﻿using AskHire_Backend.Interfaces.Repositories.AdminRepositories;
 using AskHire_Backend.Models.DTOs.AdminDTOs.PaginationDTOs;
 using AskHire_Backend.Models.Entities;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -54,23 +51,10 @@ namespace AskHire_Backend.Services.AdminServices
             return true;
         }
 
-        public async Task<PaginatedResult<JobRole>> GetPaginatedAsync(int page, int pageSize)
+        // ✅ NEW Pagination, Search, Sort method
+        public async Task<PaginatedResult<JobRole>> GetPaginatedAsync(PaginationQuery query)
         {
-            int skip = (page - 1) * pageSize;
-
-            var totalCount = await _repository.GetTotalCountAsync();
-            var jobRoles = await _repository.GetPaginatedAsync(skip, pageSize);
-
-            return new PaginatedResult<JobRole>
-            {
-                Page = page,
-                PageSize = pageSize,
-                TotalCount = totalCount,
-                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize),
-                Data = jobRoles
-            };
+            return await _repository.GetPaginatedAsync(query);
         }
-
-
     }
 }
