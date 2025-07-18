@@ -25,8 +25,6 @@ namespace AskHire_Backend.Repositories
             var query = _context.Vacancies
                 .Include(v => v.JobRole)
                 .AsQueryable()
-                // ❗ KEY FILTER: This line excludes vacancies where the end date has passed.
-                // This is why you only see 18 active vacancies out of 20 total.
                 .Where(v => v.EndDate >= DateTime.UtcNow);
 
             if (!string.IsNullOrWhiteSpace(search))
@@ -42,13 +40,26 @@ namespace AskHire_Backend.Repositories
                 );
             }
 
+            // The 'isDemanded' and 'isLatest' filters should be mutually exclusive with other sorting,
+            // or applied in a specific order if combined.
+            // In the current setup, if isLatest or isDemanded is true, they override sortOrder.
             if (isLatest)
             {
                 query = query.OrderByDescending(v => v.StartDate);
             }
             else if (isDemanded)
             {
-                //query = query.OrderByDescending(v => v.Applies.Count());
+                // To get demanded jobs, you need to count applications.
+                // This requires a GroupJoin or explicit joins if Vacancy does not have an Applies navigation property.
+                query = query
+                    .GroupJoin(
+                        _context.Applies,
+                        vacancy => vacancy.VacancyId,
+                        apply => apply.VacancyId,
+                        (vacancy, applies) => new { Vacancy = vacancy, ApplyCount = applies.Count() }
+                    )
+                    .OrderByDescending(x => x.ApplyCount)
+                    .Select(x => x.Vacancy); // Select back the Vacancy entity
             }
             else
             {
@@ -91,8 +102,10 @@ namespace AskHire_Backend.Repositories
 
         public async Task<IEnumerable<CandidateVacancyDto>> GetMostAppliedVacanciesAsync()
         {
+            // The approach here is largely correct.
+            // It explicitly joins and groups by VacancyId from the Applies table.
             var topVacancyIds = await _context.Applies
-                .Where(a => a.Vacancy.EndDate >= DateTime.UtcNow)
+                .Where(a => a.Vacancy.EndDate >= DateTime.UtcNow) // Ensure the vacancy is still active
                 .GroupBy(a => a.VacancyId)
                 .OrderByDescending(g => g.Count())
                 .Take(6)
@@ -135,10 +148,8 @@ namespace AskHire_Backend.Repositories
                 .ToListAsync();
         }
 
-        // MODIFIED METHOD SIGNATURE - userId is now nullable
         public async Task<(string status, CandidateJobShowDto? vacancy)> GetVacancyByIdAsync(Guid vacancyId, Guid? userId)
         {
-            // Only check if already applied if a userId is provided
             if (userId.HasValue)
             {
                 var hasApplied = await _context.Applies

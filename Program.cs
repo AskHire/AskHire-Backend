@@ -189,6 +189,10 @@ builder.Services.AddScoped<IApplicationService, ApplicationService>();
 
 builder.Services.AddScoped<IManagerInterviewService, ManagerInterviewService>();
 
+// Register your NotificationShowRepository and NotificationShowService
+builder.Services.AddScoped<INotificationShowRepository, NotificationShowRepository>();
+builder.Services.AddScoped<INotificationShowServices, NotificationShowService>();
+
 
 // ==============================
 // App Pipeline

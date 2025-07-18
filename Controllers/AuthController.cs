@@ -6,8 +6,8 @@ using System.Diagnostics;
 using AskHire_Backend.Models.Entities;
 using AskHire_Backend.Models.DTOs;
 using Microsoft.AspNetCore.Identity;
-using System; // Required for Guid and DateTime
-using Microsoft.Extensions.Logging; // For logging errors
+using System; 
+using Microsoft.Extensions.Logging; 
 
 [ApiController]
 [Route("api/[controller]")]
@@ -15,13 +15,13 @@ public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
     private readonly UserManager<User> _userManager;
-    private readonly ILogger<AuthController> _logger; // Inject ILogger
+    private readonly ILogger<AuthController> _logger; 
 
     public AuthController(IAuthService authService, UserManager<User> userManager, ILogger<AuthController> logger)
     {
         _authService = authService;
         _userManager = userManager;
-        _logger = logger; // Initialize logger
+        _logger = logger; 
     }
 
     [HttpPost("register")]
