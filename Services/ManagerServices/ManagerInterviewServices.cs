@@ -8,7 +8,6 @@ using AskHire_Backend.Models.DTOs;
 using AskHire_Backend.Models.DTOs.CandidateDTOs;
 using AskHire_Backend.Models.DTOs.ManagerDTOs;
 using AskHire_Backend.Models.Entities;
-using AskHire_Backend.Repositories.Interfaces;
 using AskHire_Backend.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -18,12 +17,12 @@ namespace AskHire_Backend.Services.ManagerServices
 {
     public class ManagerInterviewService : IManagerInterviewService
     {
-        private readonly IManagerInterviewRepository _interviewRepository;
+        private readonly AskHire_Backend.Interfaces.Repositories.ManagerRepositories.IManagerInterviewRepository _interviewRepository;
         private readonly IManagerEmailService _emailService;
         private readonly IReminderRepository _reminderRepository;
 
         public ManagerInterviewService(
-            IManagerInterviewRepository interviewRepository,
+            AskHire_Backend.Interfaces.Repositories.ManagerRepositories.IManagerInterviewRepository interviewRepository,
             IManagerEmailService emailService,
             IReminderRepository reminderRepository)
         {
@@ -59,6 +58,10 @@ namespace AskHire_Backend.Services.ManagerServices
             };
 
             var createdInterview = await _interviewRepository.CreateInterviewAsync(interview);
+
+            // Set DashboardStatus to "Interview" after scheduling
+            application.DashboardStatus = "Interview";
+            await _interviewRepository.UpdateApplicationAsync(application);
 
             // ? No NullReferenceException because Vacancy is included now
             var reminder = new Reminder
@@ -102,6 +105,10 @@ namespace AskHire_Backend.Services.ManagerServices
             existingInterview.Interview_Instructions = interviewRequest.Interview_Instructions ?? string.Empty;
 
             await _interviewRepository.UpdateInterviewAsync(existingInterview);
+
+            // Set DashboardStatus to "Interview" after updating
+            application.DashboardStatus = "Interview";
+            await _interviewRepository.UpdateApplicationAsync(application);
 
             if (string.IsNullOrEmpty(application.User?.Email))
                 return false;

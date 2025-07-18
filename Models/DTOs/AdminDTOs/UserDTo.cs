@@ -24,4 +24,7 @@
 
         public string? ProfilePictureUrl { get; set; }
     }
+
 }
+
+

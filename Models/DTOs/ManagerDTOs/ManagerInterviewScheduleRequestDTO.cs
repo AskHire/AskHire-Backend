@@ -17,11 +17,10 @@ namespace AskHire_Backend.Models.DTOs
         [Required]
         public string Duration { get; set; } = string.Empty;
 
-        public string? Instructions { get; set; }
+        // Fixed: Only this property for instructions, public setter
+        public string? Interview_Instructions { get; set; }
 
         // Optional interviewId for update operations
         public Guid? InterviewId { get; set; }
-
-        public string? Interview_Instructions { get; internal set; }
     }
 }

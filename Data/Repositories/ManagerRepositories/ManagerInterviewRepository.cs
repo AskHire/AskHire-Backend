@@ -3,7 +3,6 @@ using AskHire_Backend.Data.Entities;
 using AskHire_Backend.Interfaces.Repositories.ManagerRepositories;
 using AskHire_Backend.Models.DTOs.CandidateDTOs;
 using AskHire_Backend.Models.Entities;
-using AskHire_Backend.Repositories.Interfaces;
 using AskHire_Backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -34,6 +33,11 @@ namespace AskHire_Backend.Data.Repositories.ManagerRepositories
                 .FirstOrDefaultAsync(a => a.ApplicationId == applicationId);
         }
 
+        public async Task UpdateApplicationAsync(Application application)
+        {
+            _context.Applies.Update(application);
+            await _context.SaveChangesAsync();
+        }
 
         public async Task<Interview> CreateInterviewAsync(Interview interview)
         {

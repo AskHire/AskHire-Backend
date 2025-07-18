@@ -182,9 +182,10 @@ namespace AskHire_Backend.Services
                 {
                     // If it's the last character and not a letter (already caught by name.Last() check)
                     if (i == name.Length - 1 && !char.IsLetter(current)) return false;
-                    
+
                     // If it's not the last character, check the next one
-                    if (i < name.Length - 1) {
+                    if (i < name.Length - 1)
+                    {
                         char next = name[i + 1];
                         if (!char.IsLetter(next) && !char.IsWhiteSpace(next))
                         {
@@ -193,7 +194,7 @@ namespace AskHire_Backend.Services
                     }
                 }
             }
-            
+
             return true; // If all checks pass
         }
 

@@ -133,7 +133,7 @@ builder.Services.AddScoped<IAdminDashboardRepository, AdminDashboardRepository>(
 builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
 
 // Manager
-builder.Services.AddScoped<IManagerInterviewRepository, ManagerInterviewRepository>();
+builder.Services.AddScoped<IManagerInterviewRepository,ManagerInterviewRepository>();
 builder.Services.AddScoped<IManagerInterviewService, ManagerInterviewService>();
 
 

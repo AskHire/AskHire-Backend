@@ -8,5 +8,5 @@ public interface IAuthService
     Task<TokenResponseDto?> RefreshTokensAsync(string refreshToken);
     Task<bool> UpdateUserRoleAsync(UpdateRoleDto request);
     Task<User> GetUserFromTokenAsync(string token);
-    bool IsAdult(string? dobString); 
+    bool IsAdult(string? dobString);
 }
