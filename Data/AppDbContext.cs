@@ -19,4 +19,5 @@ namespace AskHire_Backend.Data.Entities
 
         public DbSet<Reminder> Reminder { get; set; }
     }
+
 }

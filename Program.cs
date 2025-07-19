@@ -133,7 +133,7 @@ builder.Services.AddScoped<IAdminDashboardRepository, AdminDashboardRepository>(
 builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
 
 // Manager
-builder.Services.AddScoped<IManagerInterviewRepository, ManagerInterviewRepository>();
+builder.Services.AddScoped<IManagerInterviewRepository,ManagerInterviewRepository>();
 builder.Services.AddScoped<IManagerInterviewService, ManagerInterviewService>();
 
 
@@ -188,6 +188,10 @@ builder.Services.AddScoped<IApplicationRepository, ApplicationRepository>();
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
 
 builder.Services.AddScoped<IManagerInterviewService, ManagerInterviewService>();
+
+// Register your NotificationShowRepository and NotificationShowService
+builder.Services.AddScoped<INotificationShowRepository, NotificationShowRepository>();
+builder.Services.AddScoped<INotificationShowServices, NotificationShowService>();
 
 
 // ==============================
