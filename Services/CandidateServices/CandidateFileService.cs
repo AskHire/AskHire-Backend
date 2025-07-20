@@ -680,4 +680,36 @@ public class CandidateFileService : ICandidateFileService
         }
     }
 
+    public async Task<bool> SendCVRejectionEmailAsync(string recipientEmail, int? cvMark)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(recipientEmail)) return false;
+
+            var message = new MailMessage
+            {
+                From = new MailAddress("your-email@example.com", "AskHire Team"),
+                Subject = "CV Review Update",
+                Body = $"Dear Candidate,\n\nYour CV has been reviewed.\nYour CV Score is: {cvMark}/100.\n\nWe regret to inform you that your CV has not been approved.\nTherefore, you are not eligible to proceed with this job application.\n\nThank you for your interest.\n\nBest regards,\nAskHire Team",
+                IsBodyHtml = false
+            };
+
+            message.To.Add(recipientEmail);
+
+            using var smtp = new SmtpClient("smtp.gmail.com", 587)
+            {
+                Credentials = new NetworkCredential("dimashiwickramage2002@gmail.com", "fnxm msjt blvm vnmo"),
+                EnableSsl = true
+            };
+
+            await smtp.SendMailAsync(message);
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+
 }
