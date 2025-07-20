@@ -25,5 +25,6 @@ public interface ICandidateFileService
     Task<ApplicationCVStatusDto?> GetCVMarkAndStatusAsync(Guid applicationId);
     Task<ApplicationCVMarkDto?> GetCVMarkAndEmailAsync(Guid applicationId);
     Task<bool> SendCVMarkEmailAsync(string recipientEmail, int? cvMark);
+    Task<bool> SendCVRejectionEmailAsync(string recipientEmail, int? cvMark);
 
 }

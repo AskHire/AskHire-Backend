@@ -8,7 +8,11 @@ using System.Security.Cryptography;
 using System.Text;
 using System;
 using Microsoft.Extensions.Configuration;
-using System.Linq; // For .Any() on strings
+using System.Linq;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Text.Encodings.Web;
+using AskHire_Backend.Interfaces.Services;
 
 namespace AskHire_Backend.Services
 {
@@ -18,13 +22,20 @@ namespace AskHire_Backend.Services
         private readonly IConfiguration _configuration;
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+        private readonly IAuthEmailService _emailService;
+        private readonly ILogger<AuthService> _logger;
 
-        public AuthService(IAuthRepository userRepository, IConfiguration configuration, UserManager<User> userManager, SignInManager<User> signInManager)
+        public AuthService(IAuthRepository userRepository, IConfiguration configuration,
+                           UserManager<User> userManager, SignInManager<User> signInManager,
+                           IAuthEmailService emailService,
+                           ILogger<AuthService> logger)
         {
             _userRepository = userRepository;
             _configuration = configuration;
             _userManager = userManager;
             _signInManager = signInManager;
+            _emailService = emailService;
+            _logger = logger;
         }
 
         public async Task<TokenResponseDto?> LoginAsync(UserDto request)
@@ -32,9 +43,17 @@ namespace AskHire_Backend.Services
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
             {
+                _logger.LogWarning("Login failed for email {Email}: Invalid credentials.", request.Email);
                 return null;
             }
 
+            if (!await _userManager.IsEmailConfirmedAsync(user))
+            {
+                _logger.LogWarning("Login attempt failed for {Email}: Email not confirmed.", request.Email);
+                throw new ApplicationException("Your email address has not been confirmed. Please check your inbox for a verification link.");
+            }
+
+            _logger.LogInformation("User {Email} successfully authenticated.", request.Email);
             return await CreateTokenResponse(user);
         }
 
@@ -42,6 +61,7 @@ namespace AskHire_Backend.Services
         {
             if (await _userRepository.AnyAsync(request.Email))
             {
+                _logger.LogWarning("Registration failed: Email {Email} already exists.", request.Email);
                 return null;
             }
 
@@ -49,10 +69,6 @@ namespace AskHire_Backend.Services
             {
                 return null;
             }
-
-            // The IsRealName checks are now primarily in the controller, but you can keep them here
-            // if you want this service to return a more specific error than just 'null' for name issues,
-            // which would then be handled in the controller. For now, the controller directly calls IsRealName.
 
             var user = new User
             {
@@ -67,18 +83,104 @@ namespace AskHire_Backend.Services
                 Address = request.Address,
                 Role = "Candidate",
                 SignUpDate = DateTime.UtcNow,
-                ProfilePictureUrl = "/avatars/avatar2.png" // Assuming a default for new users
+                ProfilePictureUrl = "/avatars/avatar2.png",
+                EmailConfirmed = false
             };
 
-            var result = await _userManager.CreateAsync(user, request.Password);
-            if (!result.Succeeded)
+            var createResult = await _userManager.CreateAsync(user, request.Password);
+            if (!createResult.Succeeded)
             {
+                foreach (var error in createResult.Errors)
+                {
+                    _logger.LogError("Identity error during user creation for {Email}: {Code} - {Description}", request.Email, error.Code, error.Description);
+                }
                 return null;
             }
 
-            await _userManager.AddToRoleAsync(user, user.Role);
+            var roleResult = await _userManager.AddToRoleAsync(user, user.Role);
+            if (!roleResult.Succeeded)
+            {
+                foreach (var error in roleResult.Errors)
+                {
+                    _logger.LogError("Identity error assigning role to {Email}: {Code} - {Description}", user.Email, error.Code, error.Description);
+                }
+                await _userManager.DeleteAsync(user);
+                return null;
+            }
 
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+            var backendBaseUrl = _configuration["BackendBaseUrl"];
+            if (string.IsNullOrEmpty(backendBaseUrl))
+            {
+                _logger.LogError("BackendBaseUrl is not configured in appsettings.json. Cannot generate email confirmation link.");
+                throw new InvalidOperationException("BackendBaseUrl is not configured. Email verification link cannot be generated.");
+            }
+
+            var callbackUrl = QueryHelpers.AddQueryString($"{backendBaseUrl}/api/Auth/confirm-email", new Dictionary<string, string?>
+            {
+                {"userId", user.Id.ToString()},
+                {"token", encodedToken}
+            });
+
+            var emailSubject = "Confirm your email for AskHire Account";
+            var emailMessage = $"Dear {user.FirstName},<br><br>" +
+                               "Thank you for registering with AskHire. Please confirm your account by clicking the link below:<br><br>" +
+                               $"<a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>Confirm My Email Address</a><br><br>" +
+                               "If you did not register for this account, please ignore this email.<br><br>" +
+                               "Sincerely,<br>The AskHire Team";
+
+            try
+            {
+                await _emailService.SendEmailAsync(user.Email, emailSubject, emailMessage);
+                _logger.LogInformation("Email confirmation link sent to {Email}", user.Email);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send email confirmation link to {Email}. User registered but email verification email could not be sent.", user.Email);
+                throw new ApplicationException("Registration successful, but we failed to send the email verification link. Please contact support.", ex);
+            }
+
+            _logger.LogInformation("User {Email} registered and assigned role {Role} successfully.", user.Email, user.Role);
             return user;
+        }
+
+        public async Task<bool> ConfirmEmailAsync(Guid userId, string token)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+            {
+                _logger.LogWarning("Email confirmation failed: User with ID {UserId} not found.", userId);
+                return false;
+            }
+
+            string decodedToken;
+            try
+            {
+                var decodedTokenBytes = WebEncoders.Base64UrlDecode(token);
+                decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
+            }
+            catch (FormatException ex)
+            {
+                _logger.LogError(ex, "Email confirmation failed for user ID: {UserId}. Token decoding failed.", userId);
+                return false;
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+
+            if (result.Succeeded)
+            {
+                _logger.LogInformation("Email for user {Email} confirmed successfully.", user.Email);
+            }
+            else
+            {
+                foreach (var error in result.Errors)
+                {
+                    _logger.LogError("Email confirmation failed for {Email} ({UserId}): {Code} - {Description}", user.Email, userId, error.Code, error.Description);
+                }
+            }
+            return result.Succeeded;
         }
 
         public async Task<TokenResponseDto?> RefreshTokensAsync(string refreshToken)
@@ -88,6 +190,8 @@ namespace AskHire_Backend.Services
             if (user == null || user.RefreshToken != refreshToken ||
                 user.RefreshTokenExpiryTime <= DateTime.UtcNow)
             {
+                _logger.LogWarning("Refresh token validation failed. User: {UserEmail}, Provided Token: {ProvidedToken}, Stored Token: {StoredToken}, Expired: {IsExpired}",
+                                   user?.Email ?? "N/A", refreshToken, user?.RefreshToken ?? "N/A", user?.RefreshTokenExpiryTime <= DateTime.UtcNow);
                 return null;
             }
 
@@ -113,6 +217,95 @@ namespace AskHire_Backend.Services
             return true;
         }
 
+        // --- New: Send Password Reset Email Method ---
+        public async Task<bool> SendPasswordResetEmailAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                _logger.LogWarning("Password reset request for non-existent email: {Email}", email);
+                // For security, always return true even if user not found to prevent email enumeration attacks
+                return true;
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            // The token needs to be URL-safe (Base64Url encoded)
+            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+            var frontendUrl = _configuration["FrontendUrl"];
+            if (string.IsNullOrEmpty(frontendUrl))
+            {
+                _logger.LogError("FrontendUrl is not configured for password reset email link.");
+                throw new InvalidOperationException("Frontend URL not configured for password reset.");
+            }
+
+            // The reset link will point to your frontend's Reset Password page
+            var callbackUrl = QueryHelpers.AddQueryString($"{frontendUrl}/reset-password", new Dictionary<string, string?>
+            {
+                {"userId", user.Id.ToString()},
+                {"token", encodedToken}
+            });
+
+            var emailSubject = "Reset Your Password for AskHire Account";
+            var emailMessage = $"Dear {user.FirstName},<br><br>" +
+                               "You have requested to reset your password. Please click the link below to set a new password:<br><br>" +
+                               $"<a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>Reset My Password</a><br><br>" +
+                               "This link is valid for a limited time. If you did not request a password reset, please ignore this email.<br><br>" +
+                               "Sincerely,<br>The AskHire Team";
+            try
+            {
+                await _emailService.SendEmailAsync(user.Email, emailSubject, emailMessage);
+                _logger.LogInformation("Password reset link sent to {Email}", email);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send password reset email to {Email}", email);
+                // Propagate the email sending failure
+                throw new ApplicationException($"Failed to send password reset email: {ex.Message}", ex);
+            }
+        }
+
+        // --- New: Reset Password Method ---
+        public async Task<bool> ResetPasswordAsync(Guid userId, string token, string newPassword)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+            {
+                _logger.LogWarning("Password reset failed: User with ID {UserId} not found for reset request.", userId);
+                return false; // User not found (might be tampered link or user deleted)
+            }
+
+            string decodedToken;
+            try
+            {
+                var decodedTokenBytes = WebEncoders.Base64UrlDecode(token);
+                decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
+            }
+            catch (FormatException ex)
+            {
+                _logger.LogError(ex, "Password reset failed for user ID: {UserId}. Token decoding failed.", userId);
+                return false; // Token is not a valid base64url string
+            }
+
+            // Perform the password reset
+            var result = await _userManager.ResetPasswordAsync(user, decodedToken, newPassword);
+
+            if (result.Succeeded)
+            {
+                _logger.LogInformation("Password successfully reset for user {Email}", user.Email);
+            }
+            else
+            {
+                foreach (var error in result.Errors)
+                {
+                    _logger.LogError("Password reset failed for {Email}: {Code} - {Description}", user.Email, error.Code, error.Description);
+                }
+            }
+            return result.Succeeded;
+        }
+
+
         public bool IsAdult(string? dobString)
         {
             if (string.IsNullOrEmpty(dobString)) return false;
@@ -129,36 +322,14 @@ namespace AskHire_Backend.Services
             return age >= 16 && age <= 100;
         }
 
-        // Custom "Real Name" Validation Logic (improved)
         public bool IsRealName(string name)
         {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                return false; // Name cannot be empty or just whitespace
-            }
+            if (string.IsNullOrWhiteSpace(name)) return false;
+            name = name.Trim();
+            if (name.Length < 2 || name.Length > 50) return false;
+            if (!name.Any(char.IsLetter)) return false;
+            if (!char.IsLetter(name.First()) || !char.IsLetter(name.Last())) return false;
 
-            name = name.Trim(); // Trim leading/trailing whitespace
-
-            // Check length again (redundant with DTO, but safe)
-            if (name.Length < 2 || name.Length > 50)
-            {
-                return false;
-            }
-
-            // Ensure it contains at least one letter (to prevent names like "--" or "''")
-            if (!name.Any(char.IsLetter))
-            {
-                return false;
-            }
-
-            // Ensure it starts and ends with a letter. This is a common requirement for names.
-            if (!char.IsLetter(name.First()) || !char.IsLetter(name.Last()))
-            {
-                return false;
-            }
-
-            // Prevent multiple consecutive hyphens, apostrophes, or periods, and also multiple spaces.
-            // This is to catch things like "John--Doe", "O''Malley", "Mr..", "First  Last"
             for (int i = 0; i < name.Length - 1; i++)
             {
                 char current = name[i];
@@ -173,29 +344,23 @@ namespace AskHire_Backend.Services
                 }
             }
 
-            // Additional check for name fragments: a hyphen, apostrophe, or period must be followed by a letter or space.
-            // This prevents names ending in a symbol or having isolated symbols like "John-", "O'", "Smith."
             for (int i = 0; i < name.Length; i++)
             {
                 char current = name[i];
                 if (current == '-' || current == '\'' || current == '.')
                 {
-                    // If it's the last character and not a letter (already caught by name.Last() check)
                     if (i == name.Length - 1 && !char.IsLetter(current)) return false;
-
-                    // If it's not the last character, check the next one
                     if (i < name.Length - 1)
                     {
                         char next = name[i + 1];
                         if (!char.IsLetter(next) && !char.IsWhiteSpace(next))
                         {
-                            return false; // Symbol must be followed by a letter or space.
+                            return false;
                         }
                     }
                 }
             }
-
-            return true; // If all checks pass
+            return true;
         }
 
         private string GenerateRefreshToken()
