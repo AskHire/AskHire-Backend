@@ -63,4 +63,3 @@ public class ProfileController : ControllerBase
         return success ? Ok(new { imageUrl = $"/avatars/{avatarFileName}" }) : BadRequest("Invalid avatar");
     }
 }
-
