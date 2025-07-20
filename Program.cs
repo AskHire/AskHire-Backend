@@ -26,7 +26,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Microsoft.Extensions.Logging; // Add this using directive
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Mvc; // Add this using directive
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,7 +38,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
         policy => policy
-            .WithOrigins("http://localhost:5173")
+            .WithOrigins("http://localhost:5173") // Changed to 3000 as per common React dev server
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials());
@@ -54,17 +55,13 @@ builder.Services.AddHttpClient();
 
 // ==============================
 // Add Logging Services
-// This registers ILogger and its providers.
-// You can configure specific providers (Console, Debug, etc.) here.
 // ==============================
 builder.Services.AddLogging(loggingBuilder =>
 {
-    loggingBuilder.ClearProviders(); // Clears default console/debug providers that might be added automatically
-    loggingBuilder.AddConsole(); // Adds console logging
-    loggingBuilder.AddDebug(); // Adds debug output logging
-    // You can add more specific logging providers here, e.g., for files, databases, or cloud services.
+    loggingBuilder.ClearProviders();
+    loggingBuilder.AddConsole();
+    loggingBuilder.AddDebug();
 });
-
 
 // ==============================
 // Database Context
@@ -74,11 +71,30 @@ builder.Services.AddDbContext<AppDbContext>(options =>
            .LogTo(Console.WriteLine));
 
 // ==============================
-// Identity
+// Identity Configuration
 // ==============================
-builder.Services.AddIdentity<User, IdentityRole<Guid>>()
-    .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders();
+builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
+{
+    // Password settings - adjust as per your security requirements
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequiredLength = 8; // Consistent with frontend regex
+    options.Password.RequiredUniqueChars = 1;
+
+    // Lockout settings
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.AllowedForNewUsers = true;
+
+    // User settings
+    options.User.RequireUniqueEmail = true;
+    // VERY IMPORTANT: Set RequireConfirmedAccount to true to enforce email verification
+    options.SignIn.RequireConfirmedAccount = true; // Changed to true
+})
+.AddEntityFrameworkStores<AppDbContext>()
+.AddDefaultTokenProviders(); // Essential for GenerateEmailConfirmationTokenAsync
 
 // ==============================
 // JWT Authentication
@@ -99,7 +115,8 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         IssuerSigningKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(builder.Configuration["AppSettings:Token"]!)),
-        ValidateIssuerSigningKey = true
+        ValidateIssuerSigningKey = true,
+        ClockSkew = TimeSpan.Zero // No leeway
     };
 
     options.Events = new JwtBearerEvents
@@ -108,6 +125,36 @@ builder.Services.AddAuthentication(options =>
         {
             context.Token = context.Request.Cookies["jwt"];
             return Task.CompletedTask;
+        },
+        // Optional: Customize 401 Unauthorized response for JWT challenges
+        OnChallenge = context =>
+        {
+            context.HandleResponse();
+            context.Response.StatusCode = (int)System.Net.HttpStatusCode.Unauthorized;
+            context.Response.ContentType = "application/json";
+            var problemDetails = new ProblemDetails
+            {
+                Status = (int)System.Net.HttpStatusCode.Unauthorized,
+                Title = "Authentication Required",
+                Detail = "You are not authorized to access this resource or your session has expired. " +
+                         (string.IsNullOrEmpty(context.ErrorDescription) ? "" : context.ErrorDescription),
+                Type = "https://tools.ietf.org/html/rfc7807#section-3.1"
+            };
+            return context.Response.WriteAsJsonAsync(problemDetails);
+        },
+        // Optional: Customize 403 Forbidden response for JWT challenges (authorization failure)
+        OnForbidden = context =>
+        {
+            context.Response.StatusCode = (int)System.Net.HttpStatusCode.Forbidden;
+            context.Response.ContentType = "application/json";
+            var problemDetails = new ProblemDetails
+            {
+                Status = (int)System.Net.HttpStatusCode.Forbidden,
+                Title = "Access Denied",
+                Detail = "You do not have permission to access this resource.",
+                Type = "https://tools.ietf.org/html/rfc7807#section-3.1"
+            };
+            return context.Response.WriteAsJsonAsync(problemDetails);
         }
     };
 });
@@ -121,22 +168,19 @@ builder.Services.AddAuthorization();
 // Common
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddTransient<IAuthEmailService, AuthEmailService>(); // Register your new email service here
 
-// Admin
+// Admin (Existing services)
 builder.Services.AddScoped<IAdminJobRoleRepository, AdminJobRoleRepository>();
 builder.Services.AddScoped<IAdminJobRoleService, AdminJobRoleService>();
-
 builder.Services.AddScoped<IAdminNotificationRepository, AdminNotificationRepository>();
 builder.Services.AddScoped<IAdminNotificationService, AdminNotificationService>();
-
 builder.Services.AddScoped<IAdminDashboardRepository, AdminDashboardRepository>();
 builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
 
-// Manager
-builder.Services.AddScoped<IManagerInterviewRepository,ManagerInterviewRepository>();
+// Manager (Existing services)
+builder.Services.AddScoped<IManagerInterviewRepository, ManagerInterviewRepository>();
 builder.Services.AddScoped<IManagerInterviewService, ManagerInterviewService>();
-
-
 builder.Services.AddScoped<IManagerEmailService, ManagerEmailService>();
 builder.Services.AddScoped<IManagerNotificationRepository, ManagerNotificationRepository>();
 builder.Services.AddScoped<IManagerNotificationService, ManagerNotificationService>();
@@ -148,51 +192,38 @@ builder.Services.AddScoped<IManagerLongListInterviewRepository, ManagerLongListI
 builder.Services.AddScoped<IManagerLongListInterviewService, ManagerLongListInterviewService>();
 builder.Services.AddScoped<IManagerLonglistIVacancyRepository, ManagerLonglistVacancyRepository>();
 
-// Candidate
+// Candidate (Existing services)
 builder.Services.AddScoped<ICandidateVacancyRepository, CandidateVacancyRepository>();
 builder.Services.AddScoped<ICandidateVacancyService, CandidateVacancyService>();
-
 builder.Services.AddScoped<ICandidateDashboardRepository, CandidateDashboardRepository>();
 builder.Services.AddScoped<ICandidateDashboardService, CandidateDashboardService>();
-
 builder.Services.AddScoped<ICandidateInterviewRepository, CandidateInterviewRepository>();
 builder.Services.AddScoped<ICandidateInterviewService, CandidateInterviewService>();
-
 builder.Services.AddScoped<ICandidatePreScreenTestRepository, CandidatePreScreenTestRepository>();
 builder.Services.AddScoped<ICandidatePreScreenTestService, CandidatePreScreenTestService>();
-
 builder.Services.AddScoped<ICandidateAnswerCheckRepository, CandidateAnswerCheckRepository>();
 builder.Services.AddScoped<ICandidateAnswerCheckService, CandidateAnswerCheckService>();
-
 builder.Services.AddScoped<ICandidateFileRepository, CandidateFileRepository>();
 builder.Services.AddScoped<ICandidateFileService, CandidateFileService>();
 
-// Vacancy & Questions
+// Vacancy & Questions (Existing services)
 builder.Services.AddScoped<IVacancyRepository, VacancyRepository>();
 builder.Services.AddScoped<IVacancyService, VacancyService>();
-
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<IQuestionService, QuestionService>();
-
 builder.Services.AddScoped<IJobRoleRepository, JobRoleRepository>();
 builder.Services.AddScoped<IJobRoleService, JobRoleService>();
 
-// ✅ Reminder Service Integration
+// Reminder Service Integration (Existing services)
 builder.Services.AddScoped<IReminderRepository, ReminderRepository>();
 builder.Services.AddScoped<IReminderService, ReminderService>();
-
 builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
-
 builder.Services.AddScoped<IApplicationRepository, ApplicationRepository>();
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
-
 builder.Services.AddScoped<IManagerInterviewService, ManagerInterviewService>();
-
-// Register your NotificationShowRepository and NotificationShowService
 builder.Services.AddScoped<INotificationShowRepository, NotificationShowRepository>();
 builder.Services.AddScoped<INotificationShowServices, NotificationShowService>();
-
 
 // ==============================
 // App Pipeline
@@ -204,7 +235,7 @@ app.UseCors("AllowFrontend");
 
 app.UseStaticFiles();
 
-// Seed roles
+// Seed roles on application startup (important for Identity)
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
@@ -226,9 +257,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Middleware
-app.UseRouting();
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
+// Middleware order is crucial
+app.UseRouting(); // Determines where the request should go
+app.UseAuthentication(); // Verifies who the user is
+app.UseAuthorization();   // Determines what the user can do
+app.MapControllers();     // Maps routes to controller actions
+
 app.Run();
