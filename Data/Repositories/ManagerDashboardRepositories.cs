@@ -35,7 +35,7 @@ namespace AskHire_Backend.Repositories
         {
             using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
-            const string query = "SELECT COUNT(*) FROM Vacancies";
+            const string query = "SELECT COUNT(*) AS TotalActiveVacancies FROM Vacancies WHERE EndDate >= CAST(GETDATE() AS DATE);";
             using var command = new SqlCommand(query, connection);
             var result = await command.ExecuteScalarAsync();
             return result != null ? Convert.ToInt32(result) : 0;
