@@ -21,10 +21,21 @@ namespace AskHire_Backend.Repositories
             var result = new InterviewStatusSummaryDto();
 
             var sql = @"
-                SELECT DashboardStatus, COUNT(*) AS Count
-                FROM Applies
-                WHERE DashboardStatus IN ('Interview', 'Pre-Screening')
-                GROUP BY DashboardStatus;
+                SELECT
+                    -- Count of Scheduled Interviews (interview date > today)
+                    (SELECT COUNT(*) 
+                     FROM Interviews 
+                     WHERE Date > CAST(GETDATE() AS DATE)) AS ScheduledInterviews,
+
+                    -- Count of Completed Interviews (interview date < today)
+                    (SELECT COUNT(*) 
+                     FROM Interviews 
+                     WHERE Date < CAST(GETDATE() AS DATE)) AS CompletedInterviews,
+
+                    -- Count of Yet to Schedule Interviews (DashboardStatus = 'Pre-Screening')
+                    (SELECT COUNT(*) 
+                     FROM Applies 
+                     WHERE DashboardStatus = 'Pre-Screening') AS YetToScheduleInterviews;
             ";
 
             using (DbConnection connection = _context.Database.GetDbConnection())
@@ -37,22 +48,15 @@ namespace AskHire_Backend.Repositories
 
                     using (DbDataReader reader = await command.ExecuteReaderAsync())
                     {
-                        while (await reader.ReadAsync())
+                        if (await reader.ReadAsync())
                         {
-                            string status = reader.GetString(0);
-                            int count = reader.GetInt32(1);
-
-                            if (status == "Interview")
-                                result.ScheduledCount = count;
-                            else if (status == "Pre-Screening")
-                                result.YetToScheduleCount = count;
+                            result.ScheduledCount = reader.GetInt32(0);
+                            result.CompletedCount = reader.GetInt32(1);
+                            result.YetToScheduleCount = reader.GetInt32(2);
                         }
                     }
                 }
             }
-
-            // Temporary hardcoded value — replace with actual logic if needed
-            result.CompletedCount = 15;
 
             return result;
         }
