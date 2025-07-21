@@ -145,5 +145,14 @@ public class CandidateFileController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("check")]
+    public async Task<IActionResult> CheckCVExists(Guid userId, Guid vacancyId)
+    {
+        var (exists, applicationId) = await _service.CheckIfCVExistsAsync(userId, vacancyId);
+
+        return Ok(new { exists, applicationId });
+    }
+
+
 
 }

@@ -536,12 +536,12 @@ public class CandidateFileService : ICandidateFileService
 
             if (analysisResult.OverallScore >= vacancy.CVPassMark)
             {
-                application.Status = "CV Approved";
+                application.Status = "Pending";
                 application.DashboardStatus = "Applied";
             }
             else
             {
-                application.Status = "CV Rejected";
+                application.Status = "Rejected";
                 application.DashboardStatus = "Application Closed";
             }
 
@@ -710,6 +710,17 @@ public class CandidateFileService : ICandidateFileService
             return false;
         }
     }
+
+    public async Task<(bool Exists, Guid? ApplicationId)> CheckIfCVExistsAsync(Guid userId, Guid vacancyId)
+    {
+        var application = await _repository.GetByUserAndVacancyAsync(userId, vacancyId);
+
+        if (application == null || string.IsNullOrEmpty(application.CVFilePath))
+            return (false, null);
+
+        return (true, application.ApplicationId);
+    }
+
 
 
 }
