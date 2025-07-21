@@ -20,7 +20,8 @@ namespace AskHire_Backend.Repositories
         }
 
         public async Task<CandidateJobPagedResultDto<CandidateVacancyDto>> GetJobWiseVacanciesAsync(
-            int pageNumber, int pageSize, string search, string sortOrder, bool isDemanded, bool isLatest)
+            int pageNumber, int pageSize, string search, string sortOrder, bool isDemanded, bool isLatest,
+            string workLocation, string workType) // New parameters
         {
             var query = _context.Vacancies
                 .Include(v => v.JobRole)
@@ -38,6 +39,18 @@ namespace AskHire_Backend.Repositories
                         v.JobRole.WorkType.ToLower().Contains(search)
                     ))
                 );
+            }
+
+            // Apply Work Location Filter
+            if (!string.IsNullOrWhiteSpace(workLocation) && workLocation.ToLower() != "all")
+            {
+                query = query.Where(v => v.JobRole != null && v.JobRole.WorkLocation.ToLower() == workLocation.ToLower());
+            }
+
+            // Apply Work Type Filter
+            if (!string.IsNullOrWhiteSpace(workType) && workType.ToLower() != "all")
+            {
+                query = query.Where(v => v.JobRole != null && v.JobRole.WorkType.ToLower() == workType.ToLower());
             }
 
             // The 'isDemanded' and 'isLatest' filters should be mutually exclusive with other sorting,

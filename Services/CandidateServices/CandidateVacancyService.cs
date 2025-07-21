@@ -17,10 +17,11 @@ namespace AskHire_Backend.Services
         }
 
         public Task<CandidateJobPagedResultDto<CandidateVacancyDto>> GetJobWiseVacanciesAsync(
-            int pageNumber, int pageSize, string search, string sortOrder, bool isDemanded, bool isLatest)
+            int pageNumber, int pageSize, string search, string sortOrder, bool isDemanded, bool isLatest,
+            string workLocation, string workType) // New parameters
         {
             // Delegate the call directly to the repository
-            return _candidateVacancyRepository.GetJobWiseVacanciesAsync(pageNumber, pageSize, search, sortOrder, isDemanded, isLatest);
+            return _candidateVacancyRepository.GetJobWiseVacanciesAsync(pageNumber, pageSize, search, sortOrder, isDemanded, isLatest, workLocation, workType); // Pass new parameters
         }
 
         public Task<IEnumerable<CandidateVacancyDto>> GetMostAppliedVacanciesAsync()
