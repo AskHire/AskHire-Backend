@@ -12,5 +12,6 @@ public interface ICandidateFileRepository
     //Task<int?> GetCVMarkByApplicationIdAsync(Guid applicationId);
     Task<ApplicationCVStatusDto?> GetCVMarkAndStatusAsync(Guid applicationId);
     Task<ApplicationCVMarkDto?> GetCVMarkAndEmailAsync(Guid applicationId);
+    Task<Application?> GetByUserAndVacancyAsync(Guid userId, Guid vacancyId);
 
 }

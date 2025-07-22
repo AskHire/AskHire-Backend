@@ -9,7 +9,8 @@ namespace AskHire_Backend.Services
     public interface ICandidateVacancyService
     {
         Task<CandidateJobPagedResultDto<CandidateVacancyDto>> GetJobWiseVacanciesAsync(
-            int pageNumber, int pageSize, string search, string sortOrder, bool isDemanded, bool isLatest);
+            int pageNumber, int pageSize, string search, string sortOrder, bool isDemanded, bool isLatest,
+            string workLocation, string workType); // New parameters
 
         Task<IEnumerable<CandidateVacancyDto>> GetMostAppliedVacanciesAsync();
         Task<IEnumerable<CandidateVacancyDto>> GetLatestVacanciesAsync();

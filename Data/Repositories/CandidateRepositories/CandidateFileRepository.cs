@@ -65,6 +65,13 @@ public class CandidateFileRepository : ICandidateFileRepository
             .FirstOrDefaultAsync();
     }
 
+    public async Task<Application?> GetByUserAndVacancyAsync(Guid userId, Guid vacancyId)
+    {
+        return await _context.Applies
+            .FirstOrDefaultAsync(a => a.UserId == userId && a.VacancyId == vacancyId);
+    }
+
+
 
     public Task SaveChangesAsync() =>
         _context.SaveChangesAsync();

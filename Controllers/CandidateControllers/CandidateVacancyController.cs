@@ -26,11 +26,13 @@ namespace AskHire_Backend.Controllers
             [FromQuery] string search = "",
             [FromQuery] string sortOrder = "none",
             [FromQuery] bool isDemanded = false,
-            [FromQuery] bool isLatest = false)
+            [FromQuery] bool isLatest = false,
+            [FromQuery] string workLocation = "all", // New parameter
+            [FromQuery] string workType = "all") // New parameter
         {
             const int pageSize = 9;
             var result = await _candidateVacancyService.GetJobWiseVacanciesAsync(
-                pageNumber, pageSize, search, sortOrder, isDemanded, isLatest);
+                pageNumber, pageSize, search, sortOrder, isDemanded, isLatest, workLocation, workType); // Pass new parameters
             return Ok(result);
         }
 
