@@ -1,5 +1,8 @@
 ﻿using AskHire_Backend.Models.DTOs.AdminDTOs.PaginationDTOs;
 using AskHire_Backend.Models.Entities;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace AskHire_Backend.Interfaces.Repositories.AdminRepositories
 {
@@ -11,7 +14,9 @@ namespace AskHire_Backend.Interfaces.Repositories.AdminRepositories
         Task UpdateAsync(JobRole jobRole);
         Task DeleteAsync(Guid jobId);
 
-        // ✅ Updated
+        // ✅ Supports pagination, search, and sorting
         Task<PaginatedResult<JobRole>> GetPaginatedAsync(PaginationQuery query);
+
+        Task<bool> ExistsAsync(JobRole jobRole);
     }
 }

@@ -34,10 +34,25 @@ namespace AskHire_Backend.Controllers.AdminNotificationControllers
 
         // POST api/adminnotification
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Notification notification)
+        public async Task<IActionResult> Create([FromBody] Notification incoming)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
+            // Set Sri Lanka time directly here
+            DateTime sriLankaTime = TimeZoneInfo.ConvertTimeFromUtc(
+                DateTime.UtcNow,
+                TimeZoneInfo.FindSystemTimeZoneById("Sri Lanka Standard Time")
+            );
+
+            var notification = new Notification
+            {
+                Subject = incoming.Subject,
+                Message = incoming.Message,
+                Type = incoming.Type,
+                Time = sriLankaTime,  // Save as Sri Lanka time
+                Status = "Admin"        // Always set as Admin
+            };
 
             var created = await _service.CreateAsync(notification);
             return CreatedAtAction(nameof(GetById), new { id = created.NotificationId }, created);

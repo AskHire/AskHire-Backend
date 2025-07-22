@@ -22,8 +22,15 @@ namespace AskHire_Backend.Services.AdminServices
         public async Task<JobRole> GetByIdAsync(Guid jobId) =>
             await _repository.GetByIdAsync(jobId);
 
+        // ✅ Ensure CreatedAt is set
         public async Task<JobRole> CreateAsync(JobRole jobRole)
         {
+            if (await _repository.ExistsAsync(jobRole))
+            {
+                return null; // Duplicate found
+            }
+
+            jobRole.CreatedAt = DateTime.UtcNow; // Set current timestamp
             await _repository.AddAsync(jobRole);
             return jobRole;
         }
@@ -51,7 +58,6 @@ namespace AskHire_Backend.Services.AdminServices
             return true;
         }
 
-        // ✅ NEW Pagination, Search, Sort method
         public async Task<PaginatedResult<JobRole>> GetPaginatedAsync(PaginationQuery query)
         {
             return await _repository.GetPaginatedAsync(query);

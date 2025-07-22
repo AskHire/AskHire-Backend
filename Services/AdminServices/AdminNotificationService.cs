@@ -10,35 +10,31 @@ public class AdminNotificationService : IAdminNotificationService
         _repository = repository;
     }
 
-    public async Task<List<Notification>> GetAllAsync()
-    {
-        return await _repository.GetAllAsync();
-    }
+    public Task<List<Notification>> GetAllAsync() =>
+        _repository.GetAllAsync();
 
-    public async Task<Notification?> GetByIdAsync(Guid id)
-    {
-        return await _repository.GetByIdAsync(id);
-    }
+    public Task<Notification?> GetByIdAsync(Guid id) =>
+        _repository.GetByIdAsync(id);
 
     public async Task<Notification> CreateAsync(Notification notification)
     {
+        // Defensive fallback
+        if (string.IsNullOrWhiteSpace(notification.Status))
+            notification.Status = "Admin";
+
+        if (notification.Time == default)
+            notification.Time = DateTime.Now;
+
         return await _repository.CreateAsync(notification);
     }
 
     public async Task<bool> DeleteAsync(Guid id)
     {
-        var notification = await _repository.GetByIdAsync(id);
-        if (notification == null)
-        {
-            return false; // Notification not found
-        }
-        // Assuming the repository has a method to delete by id
+        var exists = await _repository.GetByIdAsync(id);
+        if (exists == null) return false;
         return await _repository.DeleteAsync(id);
     }
 
-    public async Task<PaginatedResult<Notification>> GetPagedAsync(PaginationQuery query)
-    {
-        return await _repository.GetPagedAsync(query);
-    }
-
+    public Task<PaginatedResult<Notification>> GetPagedAsync(PaginationQuery query) =>
+        _repository.GetPagedAsync(query);
 }

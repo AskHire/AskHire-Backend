@@ -24,8 +24,7 @@ namespace AskHire_Backend.Data.Repositories.AdminRepositories
             await _context.JobRoles.ToListAsync();
 
         public async Task<JobRole?> GetByIdAsync(Guid jobId) =>
-    await _context.JobRoles.FindAsync(jobId);
-
+            await _context.JobRoles.FindAsync(jobId);
 
         public async Task AddAsync(JobRole jobRole)
         {
@@ -49,7 +48,7 @@ namespace AskHire_Backend.Data.Repositories.AdminRepositories
             }
         }
 
-        // ✅ New unified pagination method with search + sort
+        // ✅ Pagination with search + default sorting (newest first)
         public async Task<PaginatedResult<JobRole>> GetPaginatedAsync(PaginationQuery query)
         {
             var dataQuery = _context.JobRoles.AsQueryable();
@@ -57,20 +56,37 @@ namespace AskHire_Backend.Data.Repositories.AdminRepositories
             // 🔍 Search by JobTitle
             if (!string.IsNullOrWhiteSpace(query.SearchTerm))
             {
-                dataQuery = dataQuery.Where(j => j.JobTitle.Contains(query.SearchTerm));
+                string term = query.SearchTerm.Trim();
+                dataQuery = dataQuery.Where(j => j.JobTitle.Contains(term));
             }
 
-            // 🔃 Sort by JobTitle
-            if (!string.IsNullOrWhiteSpace(query.SortBy) && query.SortBy.Equals("JobTitle", StringComparison.OrdinalIgnoreCase))
+            // 🔃 Sorting logic
+            if (!string.IsNullOrWhiteSpace(query.SortBy))
             {
-                dataQuery = query.IsDescending
-                    ? dataQuery.OrderByDescending(j => j.JobTitle)
-                    : dataQuery.OrderBy(j => j.JobTitle);
+                switch (query.SortBy.Trim().ToLower())
+                {
+                    case "jobtitle":
+                        dataQuery = query.IsDescending
+                            ? dataQuery.OrderByDescending(j => j.JobTitle)
+                            : dataQuery.OrderBy(j => j.JobTitle);
+                        break;
+
+                    case "createddate":
+                        dataQuery = query.IsDescending
+                            ? dataQuery.OrderByDescending(j => j.CreatedAt)
+                            : dataQuery.OrderBy(j => j.CreatedAt);
+                        break;
+
+                    default:
+                        // Default: newest jobs first
+                        dataQuery = dataQuery.OrderByDescending(j => j.CreatedAt);
+                        break;
+                }
             }
             else
             {
-                // Optional: default sort by JobTitle ascending
-                dataQuery = dataQuery.OrderBy(j => j.JobTitle);
+                // Default sorting: newest first
+                dataQuery = dataQuery.OrderByDescending(j => j.CreatedAt);
             }
 
             // 📄 Pagination
@@ -88,6 +104,19 @@ namespace AskHire_Backend.Data.Repositories.AdminRepositories
                 TotalPages = (int)Math.Ceiling(totalCount / (double)query.PageSize),
                 Data = items
             };
+        }
+
+        public async Task<bool> ExistsAsync(JobRole jobRole)
+        {
+            var title = jobRole.JobTitle.Trim().ToLower();
+            var desc = jobRole.Description.Trim();
+
+            return await _context.JobRoles.AnyAsync(j =>
+                j.JobTitle.ToLower() == title &&
+                j.Description.Trim() == desc &&
+                j.WorkLocation == jobRole.WorkLocation &&
+                j.WorkType == jobRole.WorkType
+            );
         }
     }
 }
