@@ -18,7 +18,7 @@ namespace AskHire_Backend.Controllers.AdminControllers
             _service = service;
         }
 
-        // ✅ Updated to support pagination, search & sorting using PaginationQuery
+        // ✅ Pagination, search & sorting
         [HttpGet]
         public async Task<ActionResult> GetJobRoles([FromQuery] PaginationQuery query)
         {
@@ -34,15 +34,26 @@ namespace AskHire_Backend.Controllers.AdminControllers
             return Ok(job);
         }
 
+        // ✅ Single POST endpoint with duplicate handling
         [HttpPost]
-        public async Task<ActionResult<JobRole>> CreateJobRole(JobRole jobRole)
+        public async Task<ActionResult<JobRole>> CreateJobRole([FromBody] JobRole jobRole)
         {
             var created = await _service.CreateAsync(jobRole);
+
+            if (created == null)
+            {
+                return Conflict(new
+                {
+                    title = "This job already exists.",
+                    status = 409
+                });
+            }
+
             return CreatedAtAction(nameof(GetJobRoleById), new { jobId = created.JobId }, created);
         }
 
         [HttpPut("{jobId}")]
-        public async Task<IActionResult> UpdateJobRole(Guid jobId, JobRole jobRole)
+        public async Task<IActionResult> UpdateJobRole(Guid jobId, [FromBody] JobRole jobRole)
         {
             if (jobId != jobRole.JobId)
                 return BadRequest("ID mismatch");

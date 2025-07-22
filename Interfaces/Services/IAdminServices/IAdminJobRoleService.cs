@@ -14,7 +14,7 @@ namespace AskHire_Backend.Services
         Task<JobRole> UpdateAsync(Guid jobId, JobRole jobRole);
         Task<bool> DeleteAsync(Guid jobId);
 
-        // ✅ Updated method
+        // ✅ Updated method  
         Task<PaginatedResult<JobRole>> GetPaginatedAsync(PaginationQuery query);
     }
 }

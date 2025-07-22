@@ -13,5 +13,7 @@ namespace AskHire_Backend.Models.Entities
         public required string Description { get; set; }
         public required string WorkType { get; set; }
         public required string WorkLocation { get; set; }
+
+        public DateTime CreatedAt { get; set; }
     }
 }

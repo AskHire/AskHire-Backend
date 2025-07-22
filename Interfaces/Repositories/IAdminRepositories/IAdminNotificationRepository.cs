@@ -6,7 +6,6 @@ public interface IAdminNotificationRepository
     Task<List<Notification>> GetAllAsync();
     Task<Notification?> GetByIdAsync(Guid id);
     Task<Notification> CreateAsync(Notification notification);
-
     Task<bool> DeleteAsync(Guid id);
     Task<PaginatedResult<Notification>> GetPagedAsync(PaginationQuery query);
 }
