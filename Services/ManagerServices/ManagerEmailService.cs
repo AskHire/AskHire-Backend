@@ -18,7 +18,7 @@ namespace AskHire_Backend.Services.ManagerServices
                     return false;
                 }
 
-                var fromAddress = new MailAddress("youremail@example.com", "Your Company");
+                var fromAddress = new MailAddress("hello@askhire.com", "ASKHIRE Company");
                 var toAddress = new MailAddress(recipientEmail);
                 const string subject = "Interview Invitation";
 
@@ -40,7 +40,7 @@ Duration: {durationFormat}
 Instructions: {interview.Interview_Instructions}
 
 Best regards,
-Your Company";
+ASKHIRE Company";
 
                 using (var smtpClient = new SmtpClient("smtp.gmail.com")
                 {
